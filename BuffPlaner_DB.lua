@@ -11,6 +11,12 @@ BuffPlaner_DefaultConfig = {
         -- spellName: { "Cast Name", "Alias 1", ... }
         -- raidSpellName: (Optional) The group/raid version of the spell
         -- range: (Optional) Buff range in yards (default 40)
+        { key = "sp",       name = "SP",           spellName = { "Spirit Power", "Totem of Wrath" }, icon = "spell_holy_mindvision", range = 40 },
+        { key = "ap",       name = "AP",           spellName = { "Agility", "Grace of Air" },      icon = "spell_nature_ancestralguard", range = 40 },
+        { key = "mp5_cr",   name = "MP5\n+ CR",    spellName = { "MP5 + Crit", "Mana Spring Totem" }, icon = "spell_nature_manabolt", range = 30 },
+        { key = "all_stats",name = "All\nStats",   spellName = { "All Stats", "Mark of the Wild", "Gift of the Wild" }, raidSpellName = "Gift of the Wild", icon = "spell_arcane_prism", range = 40 },
+        { key = "spirit",   name = "Spirit",       spellName = { "Divine Spirit", "Prayer of Spirit" }, raidSpellName = "Prayer of Spirit", icon = "spell_nature_ward", range = 40 },
+        { key = "stam",     name = "Stam",         spellName = { "Power Word: Fortitude", "Prayer of Fortitude" }, raidSpellName = "Prayer of Fortitude", icon = "spell_holy_wordfortitude", range = 40 },
 
         -- Sun Cleric Specifics
         { key = "sun_mp5_cost_reduction",   name = "MP5 +\nCost Reduction",         spellName = { "Devotion of Grace" }, icon = "spell_holy_mindvision", range = 40 },
