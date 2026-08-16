@@ -66,15 +66,19 @@ end
 local EventFrame = CreateFrame("Frame", "BuffPlaner_EventFrame", UIParent);
 EventFrame:RegisterEvent("ADDON_LOADED");
 EventFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
-EventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED");
-EventFrame:RegisterEvent("CHAT_MSG_ADDON");
+EventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+EventFrame:RegisterEvent("CHAT_MSG_ADDON")
+EventFrame:RegisterEvent("PLAYER_TARGET_CHANGED") -- Update instantly when targeting
 
 EventFrame:SetScript("OnEvent", function(self, event, ...)
     local arg1, arg2, _, arg4 = ...
     if event == "ADDON_LOADED" and arg1 == "BuffPlaner" then BuffPlaner_OnLoad(self)
-    elseif event == "PLAYER_ENTERING_WORLD" then
-        if BuffPlaner_DragButton then BuffPlaner_LoadButtonPosition(BuffPlaner_DragButton) end
-        BuffPlaner_RequestSync()
+    elseif event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_TARGET_CHANGED" then
+        if BuffPlaner_DragButton then
+            if event == "PLAYER_ENTERING_WORLD" then BuffPlaner_LoadButtonPosition(BuffPlaner_DragButton) end
+            BuffPlaner_UpdateBuffButton()
+        end
+        if event == "PLAYER_ENTERING_WORLD" then BuffPlaner_RequestSync() end
     elseif event == "PARTY_MEMBERS_CHANGED" then
         BuffPlaner_RequestSync()
         if BuffPlaner_ConfigFrame and BuffPlaner_ConfigFrame:IsVisible() then BuffPlaner_OnConfigShow() end
@@ -286,24 +290,46 @@ function BuffPlaner_UpdateBuffButton()
     for name, key in pairs(BuffPlaner.WishesFromOthers) do recipients[name] = key end
     if BuffPlanerDB.selections[myName] then recipients[myName] = BuffPlanerDB.selections[myName] end
 
-    for _, info in ipairs(members) do
-        local recipientName, unit = info.name, info.unit
-        local desiredKey = recipients[recipientName]
-        if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
+    -- 1. First Pass: Check if CURRENT TARGET needs a buff from me
+    if UnitExists("target") and UnitIsPlayer("target") and not UnitIsDeadOrGhost("target") then
+        local tName = GetCleanName(UnitName("target"))
+        local desiredKey = recipients[tName]
+        if desiredKey then
             local b = BuffPlaner_GetBuffByKey(desiredKey)
-            if b and UnitIsInRange(unit, b) then
-                any = true;
-                local has, exp = UnitHasBuff(unit, b.spellName)
+            if b and UnitIsInRange("target", b) then
+                local has, exp = UnitHasBuff("target", b.spellName)
                 local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
-
                 if not has then
-                    someoneNeedsBuff = true;
-                    if not targetName then targetName, castSpellName = recipientName, spellToCast end
-                elseif exp and exp > 0 then
-                    local rem = exp - GetTime();
-                    if rem < minExp then
-                        minExp = rem
-                        if not targetName or not someoneNeedsBuff then targetName, castSpellName = recipientName, spellToCast end
+                    someoneNeedsBuff, targetName, castSpellName = true, tName, spellToCast
+                else
+                    any, minExp = true, (exp - GetTime())
+                    targetName, castSpellName = tName, spellToCast
+                end
+            end
+        end
+    end
+
+    -- 2. Second Pass: Check everyone else if no high-priority target found
+    if not someoneNeedsBuff then
+        for _, info in ipairs(members) do
+            local recipientName, unit = info.name, info.unit
+            local desiredKey = recipients[recipientName]
+            if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
+                local b = BuffPlaner_GetBuffByKey(desiredKey)
+                if b and UnitIsInRange(unit, b) then
+                    any = true;
+                    local has, exp = UnitHasBuff(unit, b.spellName)
+                    local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
+
+                    if not has then
+                        someoneNeedsBuff = true;
+                        if not targetName then targetName, castSpellName = recipientName, spellToCast end
+                    elseif exp and exp > 0 then
+                        local rem = exp - GetTime();
+                        if rem < minExp then
+                            minExp = rem
+                            if not targetName or not someoneNeedsBuff then targetName, castSpellName = recipientName, spellToCast end
+                        end
                     end
                 end
             end
