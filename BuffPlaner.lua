@@ -18,7 +18,6 @@ if L then
     L["Minimap Icon geklickt!"] = true
     L["Rechtsklick zum Öffnen der Konfiguration"] = true
     L["Linksklick zum Öffnen der Konfiguration"] = true
-    L["Rechtsklick für Log-Nachricht"] = true
 end
 L = LibStub("AceLocale-3.0"):GetLocale("BuffPlaner")
 
@@ -29,7 +28,7 @@ local LDBIcon = LibStub("LibDBIcon-1.0", true)
 local function GetCleanName(name)
     if not name then return nil end
     local clean = name:match("([^%-]+)")
-    return clean
+    return clean:gsub("^%s*(.-)%s*$", "%1") -- Trim spaces
 end
 
 local function createLDBLauncher()
@@ -50,7 +49,14 @@ end
 function BuffPlaner_OnLoad(self)
     BuffPlaner_InitializeDB();
     if LDB then createLDBLauncher() end
-    if BuffPlaner_DragButton then BuffPlaner_DragButton:SetAttribute("type", "spell") end
+
+    if BuffPlaner_DragButton then
+        -- Clear all legacy attributes to prevent accidental self-buffing
+        BuffPlaner_DragButton:SetAttribute("type", "macro")
+        BuffPlaner_DragButton:SetAttribute("unit", nil)
+        BuffPlaner_DragButton:SetAttribute("spell", nil)
+    end
+
     BuffPlaner_Print("Buff Planer geladen. /buffplaner zum Öffnen.");
     SLASH_BUFFPLANNER1, SLASH_BUFFPLANNER2 = "/buffplaner", "/bp";
     SlashCmdList["BUFFPLANNER"] = BuffPlaner_OnSlashCommand;
@@ -214,7 +220,8 @@ function BuffPlaner_OnConfigShow()
 
                     btn.buffKey, btn.playerName = buff.key, playerName
                     btn:SetScript("OnClick", function(s)
-                        BuffPlanerDB.selections[s.playerName] = (BuffPlanerDB.selections[s.playerName] == s.buffKey) and nil or s.buffKey
+                        local cur = BuffPlanerDB.selections[s.playerName]
+                        if cur == s.buffKey then BuffPlanerDB.selections[s.playerName] = nil else BuffPlanerDB.selections[s.playerName] = s.buffKey end
                         BuffPlaner_BroadcastWishes()
                         BuffPlaner_OnConfigShow()
                     end)
@@ -248,55 +255,23 @@ local function UnitIsInRange(unit, buff)
     if not unit or not buff then return false end
     if unit == "player" then return true end
     local castName = type(buff.spellName) == "table" and buff.spellName[1] or buff.spellName
-    -- Try spell range check first
+    -- 1. Try spell range (dynamic)
     local inRange = IsSpellInRange(castName, unit)
     if inRange ~= nil then return inRange == 1 end
-    -- Fallback for 3.3.5/Ascension: CheckInteractDistance 4 is ~30 yards
+    -- 2. Try unit check (WotLK 40yd)
+    if UnitInRange(unit) then return true end
+    -- 3. Last fallback (Interact 30yd)
     return CheckInteractDistance(unit, 4)
-end
-
-function BuffPlaner_OnBuffButtonClicked(self)
-    if InCombatLockdown() then return end
-    local members = BuffPlaner_GetPartyMembers()
-    local target, cast, minExp = nil, nil, 999999
-    local myName = GetCleanName(UnitName("player"))
-
-    local recipients = {}
-    for name, key in pairs(BuffPlaner.WishesFromOthers) do recipients[name] = key end
-    if BuffPlanerDB.selections[myName] then recipients[myName] = BuffPlanerDB.selections[myName] end
-
-    -- Reset button attributes first to prevent accidental self-buffing
-    self:SetAttribute("unit", nil)
-    self:SetAttribute("spell", nil)
-
-    for _, info in ipairs(members) do
-        local recipientName, unit = info.name, info.unit
-        local desiredKey = recipients[recipientName]
-
-        if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
-            local b = BuffPlaner_GetBuffByKey(desiredKey)
-            if b and UnitIsInRange(unit, b) then
-                local has, exp = UnitHasBuff(unit, b.spellName)
-                local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
-                if not has then target, cast = unit, spellToCast; break
-                elseif exp and exp > 0 then
-                    local rem = exp - GetTime(); if rem < minExp then minExp, target, cast = rem, unit, spellToCast end
-                end
-            end
-        end
-    end
-    if target then
-        BuffPlaner_Print("Buffing: " .. (UnitName(target) or target) .. " with " .. cast)
-        self:SetAttribute("unit", target); self:SetAttribute("spell", cast)
-    end
 end
 
 function BuffPlaner_UpdateBuffButton()
     local text, btn = BuffPlaner_DragButtonText, BuffPlaner_DragButton
     if not text or not btn then return end
+
     local members = BuffPlaner_GetPartyMembers()
-    local need, minExp, any = false, 999999, false
+    local someoneNeedsBuff, minExp, any = false, 999999, false
     local myName = GetCleanName(UnitName("player"))
+    local targetName, castSpellName = nil, nil
 
     local recipients = {}
     for name, key in pairs(BuffPlaner.WishesFromOthers) do recipients[name] = key end
@@ -308,13 +283,39 @@ function BuffPlaner_UpdateBuffButton()
         if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
             local b = BuffPlaner_GetBuffByKey(desiredKey)
             if b and UnitIsInRange(unit, b) then
-                any = true; local has, exp = UnitHasBuff(unit, b.spellName)
-                if not has then need = true; break end
-                if exp and exp > 0 then local rem = exp - GetTime(); if rem < minExp then minExp = rem end end
+                any = true;
+                local has, exp = UnitHasBuff(unit, b.spellName)
+                local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
+
+                if not has then
+                    someoneNeedsBuff = true;
+                    if not targetName then targetName, castSpellName = recipientName, spellToCast end
+                elseif exp and exp > 0 then
+                    local rem = exp - GetTime();
+                    if rem < minExp then
+                        minExp = rem
+                        if not targetName or not someoneNeedsBuff then targetName, castSpellName = recipientName, spellToCast end
+                    end
+                end
             end
         end
     end
-    if need then text:SetText("BUFF"); btn:SetBackdropColor(0.8, 0, 0, 1)
+
+    -- PRE-ARM the button (only out of combat)
+    if not InCombatLockdown() then
+        if targetName and castSpellName then
+            btn:SetAttribute("type", "spell")
+            btn:SetAttribute("unit", targetName)
+            btn:SetAttribute("spell", castSpellName)
+            btn.armedName, btn.armedSpell = targetName, castSpellName
+        else
+            btn:SetAttribute("unit", nil)
+            btn:SetAttribute("spell", nil)
+            btn.armedName, btn.armedSpell = nil, nil
+        end
+    end
+
+    if someoneNeedsBuff then text:SetText("BUFF"); btn:SetBackdropColor(0.8, 0, 0, 1)
     elseif any then
         if minExp < 999999 then
             local m, s = math.floor(minExp/60), math.floor(minExp%60)
@@ -322,6 +323,12 @@ function BuffPlaner_UpdateBuffButton()
         else text:SetText("OK") end
         btn:SetBackdropColor(0, 0.6, 0, 1)
     else text:SetText("WAIT"); btn:SetBackdropColor(0.2, 0.2, 0.2, 0.8) end
+end
+
+function BuffPlaner_OnBuffButtonClicked(self)
+    if self.armedName and self.armedSpell then
+        BuffPlaner_Print("Buffing: |cff00ffff" .. self.armedName .. "|r with " .. self.armedSpell)
+    end
 end
 
 -- =============================================================================
@@ -359,12 +366,11 @@ function BuffPlaner_OnSlashCommand(msg)
     if msg == "config" then BuffPlaner_ToggleConfigWindow()
     elseif msg == "buffbutton" then BuffPlaner_ToggleBuffButton()
     elseif msg == "check" then
-        local buffs = BuffPlaner_GetBuffs()
-        for _, b in ipairs(buffs) do
-            local cast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
-            local n, _, tex = GetSpellInfo(cast)
-            if n then BuffPlaner_Print(string.format("|T%s:16|t %s -> |cff00ffff%s|r", tex, n, tex:match("([^%\\]+)$") or tex))
-            else BuffPlaner_Print("|cffff0000Error:|r Spell '"..cast.."' not found!") end
+        for _, b in ipairs(BuffPlaner_GetBuffs()) do
+            local c = type(b.spellName) == "table" and b.spellName[1] or b.spellName
+            local n, _, t = GetSpellInfo(c)
+            if n then BuffPlaner_Print(string.format("|T%s:16|t %s -> |cff00ffff%s|r", t, n, t:match("([^%\\]+)$") or t))
+            else BuffPlaner_Print("|cffff0000Error:|r Spell '"..c.."' not found!") end
         end
     else BuffPlaner_Print("/bp config, /bp buffbutton, or /bp check") end
 end

@@ -101,7 +101,7 @@
 
     <!-- Draggable Buff Button -->
     <Button name="BuffPlaner_DragButton" inherits="SecureActionButtonTemplate" movable="true" parent="UIParent" toplevel="true" frameStrata="MEDIUM" clampedToScreen="true">
-        <Size x="90" y="60"/>
+        <Size x="60" y="60"/>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
