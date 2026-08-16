@@ -187,7 +187,7 @@ function BuffPlaner_OnConfigShow()
 
     local members, buffs = BuffPlaner_GetPartyMembers(), BuffPlaner_GetBuffs()
     local classBuffMap, scrollChild = BuffPlaner_DefaultConfig.classBuffs, BuffPlaner_ConfigFrameScrollChild
-    local startY, rowHeight = 0, 70
+    local startY, rowHeight = 0, 65
 
     for _, info in ipairs(members) do
         local playerName, unit = info.name, info.unit
