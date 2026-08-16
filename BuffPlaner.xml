@@ -1,0 +1,146 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Main Configuration Frame -->
+    <Frame name="BuffPlaner_ConfigFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" frameStrata="DIALOG">
+        <Size x="600" y="450"/>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+            <BackgroundInsets left="11" right="12" top="12" bottom="11"/>
+            <TileSize val="32"/>
+            <EdgeSize val="32"/>
+        </Backdrop>
+
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="BuffPlaner_ConfigFrameInfoText" inherits="GameFontHighlight" text="Select Buffs that you would like to have:">
+                    <Size x="550" y="20"/>
+                    <Anchors>
+                        <Anchor point="TOP" x="0" y="-45"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+
+        <Frames>
+            <!-- Header Texture -->
+            <Frame name="$parentHeader">
+                <Size x="256" y="64"/>
+                <Anchors>
+                    <Anchor point="TOP" x="0" y="12"/>
+                </Anchors>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <Texture name="$parentTexture" file="Interface\DialogFrame\UI-DialogBox-Header">
+                            <Size x="256" y="64"/>
+                            <Anchors>
+                                <Anchor point="TOP"/>
+                            </Anchors>
+                        </Texture>
+                        <FontString name="BuffPlaner_ConfigFrameTitle" inherits="GameFontNormal" text="Buff Planer">
+                            <Anchors>
+                                <Anchor point="TOP" relativeTo="$parentTexture">
+                                    <Offset x="0" y="-14"/>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+
+            <!-- Close Button -->
+            <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" x="-8" y="-8"/>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        self:GetParent():Hide()
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+            <!-- Scroll Container -->
+            <Frame name="$parentScrollContainer">
+                <Size x="560" y="345"/>
+                <Anchors>
+                    <Anchor point="TOP" x="0" y="-75"/>
+                </Anchors>
+                <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border">
+                    <BackgroundInsets left="4" right="4" top="4" bottom="4"/>
+                    <EdgeSize val="16"/>
+                </Backdrop>
+                <Frames>
+                    <ScrollFrame name="BuffPlaner_ConfigFrameScrollFrame" inherits="UIPanelScrollFrameTemplate">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="6" y="-6"/>
+                            <Anchor point="BOTTOMRIGHT" x="-26" y="6"/>
+                        </Anchors>
+                        <ScrollChild>
+                            <Frame name="BuffPlaner_ConfigFrameScrollChild">
+                                <Size x="520" y="340"/>
+                            </Frame>
+                        </ScrollChild>
+                    </ScrollFrame>
+                </Frames>
+            </Frame>
+        </Frames>
+
+        <Scripts>
+            <OnShow>
+                if BuffPlaner_OnConfigShow then BuffPlaner_OnConfigShow() end
+            </OnShow>
+            <OnMouseDown>
+                self:StartMoving()
+            </OnMouseDown>
+            <OnMouseUp>
+                self:StopMovingOrSizing()
+            </OnMouseUp>
+        </Scripts>
+    </Frame>
+
+    <!-- Draggable Buff Button -->
+    <Button name="BuffPlaner_DragButton" inherits="SecureActionButtonTemplate" movable="true" parent="UIParent" toplevel="true" frameStrata="MEDIUM" clampedToScreen="true">
+        <Size x="90" y="60"/>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Tooltips\UI-Tooltip-Border">
+            <BackgroundInsets left="3" right="3" top="3" bottom="3"/>
+            <EdgeSize val="12"/>
+        </Backdrop>
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString name="$parentText" inherits="GameFontNormalLarge" text="BUFF">
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnMouseDown>
+                if IsAltKeyDown() then
+                    self:StartMoving()
+                end
+            </OnMouseDown>
+            <OnMouseUp>
+                self:StopMovingOrSizing()
+                if BuffPlaner_SaveButtonPosition then
+                    BuffPlaner_SaveButtonPosition(self)
+                end
+            </OnMouseUp>
+            <OnShow>
+                if BuffPlaner_LoadButtonPosition then
+                    BuffPlaner_LoadButtonPosition(self)
+                end
+                if BuffPlaner_UpdateBuffButton then
+                    BuffPlaner_UpdateBuffButton()
+                end
+            </OnShow>
+            <PreClick>
+                if BuffPlaner_OnBuffButtonClicked then BuffPlaner_OnBuffButtonClicked(self) end
+            </PreClick>
+        </Scripts>
+    </Button>
+</Ui>
