@@ -84,7 +84,7 @@ EventFrame:SetScript("OnEvent", function(self, event, ...)
 end);
 
 function BuffPlaner_Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg, 0, 1, 0.5);
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg, 0, 1, 0.5);
 end
 
 function BuffPlaner_GetPartyMembers()
@@ -165,7 +165,11 @@ end
 -- =============================================================================
 
 function BuffPlaner_ToggleConfigWindow()
-    if BuffPlaner_ConfigFrame:IsVisible() then BuffPlaner_ConfigFrame:Hide() else
+    if BuffPlaner_ConfigFrame:IsVisible() then
+        BuffPlaner_ConfigFrame:Hide()
+    else
+        local _, token = UnitClass("player")
+        BuffPlaner_Print("Detected your class as: |cff00ffff" .. (token or "UNKNOWN") .. "|r")
         BuffPlaner_RequestSync()
         BuffPlaner_ConfigFrame:Show()
     end
@@ -173,6 +177,11 @@ end
 
 function BuffPlaner_OnConfigShow()
     BuffPlaner_ConfigFrameTitle:SetText("Buff Planer");
+
+    local _, myToken = UnitClass("player")
+    -- Use standard print for debug to ensure it's seen
+    -- print("|cff00ff00[Buff Planer]|r DEBUG: Your Class Token is: |cff00ffff" .. (myToken or "NIL") .. "|r")
+
     if not BuffPlaner_PlayerRows then BuffPlaner_PlayerRows = {} end
     for i, row in ipairs(BuffPlaner_PlayerRows) do row:Hide(); BuffPlaner_PlayerRows[i] = nil end
 
@@ -183,8 +192,8 @@ function BuffPlaner_OnConfigShow()
     for _, info in ipairs(members) do
         local playerName, unit = info.name, info.unit
         local _, classToken = UnitClass(unit)
-        local allowedBuffs = classBuffMap[classToken] or {}
-        local classColor = RAID_CLASS_COLORS[classToken] or { r=1, g=1, b=1 }
+        local allowedBuffs = classToken and (classBuffMap[classToken] or classBuffMap[classToken:upper()]) or {}
+        local classColor = (classToken and RAID_CLASS_COLORS[classToken:upper()]) or { r=1, g=1, b=1 }
 
         local rowFrame = CreateFrame("Frame", nil, scrollChild)
         rowFrame:SetSize(520, rowHeight); rowFrame:SetPoint("TOPLEFT", 10, -startY)
@@ -315,19 +324,30 @@ function BuffPlaner_UpdateBuffButton()
         end
     end
 
-    if someoneNeedsBuff then text:SetText("BUFF"); btn:SetBackdropColor(0.8, 0, 0, 1)
+    if someoneNeedsBuff then
+        text:SetFontObject("GameFontNormalLarge")
+        text:SetText("BUFF");
+        btn:SetBackdropColor(0.8, 0, 0, 1)
     elseif any then
+        text:SetFontObject("GameFontNormalLarge")
         if minExp < 999999 then
             local m, s = math.floor(minExp/60), math.floor(minExp%60)
             text:SetText(string.format("%d:%02d", m, s))
         else text:SetText("OK") end
         btn:SetBackdropColor(0, 0.6, 0, 1)
-    else text:SetText("WAIT"); btn:SetBackdropColor(0.2, 0.2, 0.2, 0.8) end
+    else
+        text:SetFontObject("GameFontNormalSmall")
+        text:SetText("Select\nBuff");
+        btn:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
+    end
 end
 
 function BuffPlaner_OnBuffButtonClicked(self)
     if self.armedName and self.armedSpell then
         BuffPlaner_Print("Buffing: |cff00ffff" .. self.armedName .. "|r with " .. self.armedSpell)
+    else
+        -- If no buff is selected or armed, open the config window
+        BuffPlaner_ToggleConfigWindow()
     end
 end
 
