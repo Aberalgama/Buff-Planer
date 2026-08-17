@@ -93,23 +93,29 @@ end
 
 function BuffPlaner_GetPartyMembers()
     local members = {};
+    local myName = GetCleanName(UnitName("player"))
+
+    -- Always put self FIRST in the scanning priority
+    table.insert(members, { name = myName, unit = "player" })
+
     local nr = GetNumRaidMembers()
     if nr > 0 then
         for i = 1, nr do
             local name = UnitName("raid"..i)
-            if name then table.insert(members, { name = GetCleanName(name), unit = "raid"..i }) end
+            if name and GetCleanName(name) ~= myName then
+                table.insert(members, { name = GetCleanName(name), unit = "raid"..i })
+            end
         end
     else
         local np = GetNumPartyMembers()
         for i = 1, np do
             local name = UnitName("party"..i)
-            if name then table.insert(members, { name = GetCleanName(name), unit = "party"..i }) end
+            if name and GetCleanName(name) ~= myName then
+                table.insert(members, { name = GetCleanName(name), unit = "party"..i })
+            end
         end
     end
-    local myName = GetCleanName(UnitName("player"))
-    local foundSelf = false
-    for _, m in ipairs(members) do if m.name == myName then foundSelf = true; break end end
-    if not foundSelf then table.insert(members, { name = myName, unit = "player" }) end
+
     return members;
 end
 
@@ -191,7 +197,7 @@ function BuffPlaner_OnConfigShow()
 
     local members, buffs = BuffPlaner_GetPartyMembers(), BuffPlaner_GetBuffs()
     local classBuffMap, scrollChild = BuffPlaner_DefaultConfig.classBuffs, BuffPlaner_ConfigFrameScrollChild
-    local startY, rowHeight = 0, 65
+    local startY, rowHeight = 0, 95
 
     for _, info in ipairs(members) do
         local playerName, unit = info.name, info.unit
@@ -203,12 +209,12 @@ function BuffPlaner_OnConfigShow()
         rowFrame:SetSize(520, rowHeight); rowFrame:SetPoint("TOPLEFT", 10, -startY)
 
         local classIcon = rowFrame:CreateTexture(nil, "OVERLAY")
-        classIcon:SetSize(24, 24); classIcon:SetPoint("LEFT", 5, 0)
+        classIcon:SetSize(24, 24); classIcon:SetPoint("LEFT", 5, 10)
         local coords = CLASS_ICON_TCOORDS[classToken]
         if coords then classIcon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes"); classIcon:SetTexCoord(unpack(coords)) end
 
         local nameText = rowFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        nameText:SetSize(120, rowHeight); nameText:SetPoint("LEFT", classIcon, "RIGHT", 5, 0); nameText:SetJustifyH("LEFT")
+        nameText:SetSize(120, rowHeight); nameText:SetPoint("LEFT", classIcon, "RIGHT", 5, 10); nameText:SetJustifyH("LEFT")
         nameText:SetText(playerName); nameText:SetTextColor(classColor.r, classColor.g, classColor.b)
 
         local selectedKey, renderIdx = BuffPlanerDB.selections[playerName], 1
@@ -221,7 +227,7 @@ function BuffPlaner_OnConfigShow()
 
                 if knows then
                     local btn = CreateFrame("Button", nil, rowFrame)
-                    btn:SetSize(36, 36); btn:SetPoint("LEFT", nameText, "RIGHT", 10 + (renderIdx-1)*50, 8)
+                    btn:SetSize(36, 36); btn:SetPoint("LEFT", nameText, "RIGHT", 10 + (renderIdx-1)*55, 15)
                     local _, _, spellIcon = GetSpellInfo(castName)
                     local icon = btn:CreateTexture(nil, "BACKGROUND"); icon:SetAllPoints(btn); icon:SetTexture(spellIcon or "Interface\\Icons\\" .. (buff.icon or "INV_Misc_QuestionMark"))
                     btn:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", tile=true, tileSize=16, edgeSize=12, insets={left=2,right=2,top=2,bottom=2}})
@@ -284,13 +290,13 @@ function BuffPlaner_UpdateBuffButton()
     local members = BuffPlaner_GetPartyMembers()
     local someoneNeedsBuff, minExp, any = false, 999999, false
     local myName = GetCleanName(UnitName("player"))
-    local targetName, castSpellName = nil, nil
+    local targetUnitToken, targetName, castSpellName = nil, nil, nil
 
     local recipients = {}
     for name, key in pairs(BuffPlaner.WishesFromOthers) do recipients[name] = key end
     if BuffPlanerDB.selections[myName] then recipients[myName] = BuffPlanerDB.selections[myName] end
 
-    -- 1. First Pass: Check if CURRENT TARGET needs a buff from me
+    -- Pass 1: Check Current Target (if valid player)
     if UnitExists("target") and UnitIsPlayer("target") and not UnitIsDeadOrGhost("target") then
         local tName = GetCleanName(UnitName("target"))
         local desiredKey = recipients[tName]
@@ -300,16 +306,16 @@ function BuffPlaner_UpdateBuffButton()
                 local has, exp = UnitHasBuff("target", b.spellName)
                 local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
                 if not has then
-                    someoneNeedsBuff, targetName, castSpellName = true, tName, spellToCast
+                    someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, (UnitIsUnit("target", "player") and "player" or "target"), tName, spellToCast
                 else
                     any, minExp = true, (exp - GetTime())
-                    targetName, castSpellName = tName, spellToCast
+                    targetUnitToken, targetName, castSpellName = (UnitIsUnit("target", "player") and "player" or "target"), tName, spellToCast
                 end
             end
         end
     end
 
-    -- 2. Second Pass: Check everyone else if no high-priority target found
+    -- Pass 2: Check Party/Raid Members
     if not someoneNeedsBuff then
         for _, info in ipairs(members) do
             local recipientName, unit = info.name, info.unit
@@ -323,12 +329,14 @@ function BuffPlaner_UpdateBuffButton()
 
                     if not has then
                         someoneNeedsBuff = true;
-                        if not targetName then targetName, castSpellName = recipientName, spellToCast end
+                        if not targetUnitToken then targetUnitToken, targetName, castSpellName = unit, recipientName, spellToCast end
                     elseif exp and exp > 0 then
                         local rem = exp - GetTime();
                         if rem < minExp then
                             minExp = rem
-                            if not targetName or not someoneNeedsBuff then targetName, castSpellName = recipientName, spellToCast end
+                            if not targetUnitToken or not someoneNeedsBuff then
+                                targetUnitToken, targetName, castSpellName = unit, recipientName, spellToCast
+                            end
                         end
                     end
                 end
@@ -338,9 +346,9 @@ function BuffPlaner_UpdateBuffButton()
 
     -- PRE-ARM the button (only out of combat)
     if not InCombatLockdown() then
-        if targetName and castSpellName then
+        if targetUnitToken and castSpellName then
             btn:SetAttribute("type", "spell")
-            btn:SetAttribute("unit", targetName)
+            btn:SetAttribute("unit", targetUnitToken)
             btn:SetAttribute("spell", castSpellName)
             btn.armedName, btn.armedSpell = targetName, castSpellName
         else

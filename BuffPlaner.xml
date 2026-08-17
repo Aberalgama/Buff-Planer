@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
     <!-- Main Configuration Frame -->
     <Frame name="BuffPlaner_ConfigFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" frameStrata="DIALOG">
-        <Size x="600" y="500"/>
+        <Size x="600" y="600"/>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
@@ -62,7 +62,7 @@
 
             <!-- Scroll Container -->
             <Frame name="$parentScrollContainer">
-                <Size x="560" y="395"/>
+                <Size x="560" y="495"/>
                 <Anchors>
                     <Anchor point="TOP" x="0" y="-75"/>
                 </Anchors>
