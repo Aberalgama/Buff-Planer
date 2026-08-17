@@ -17,7 +17,7 @@ BuffPlaner_DefaultConfig = {
         { key = "sun_sp",    name = "SP",          spellName = { "Devotion of Radiance" }, icon = "Devotion_of_Dawnbreak", range = 40 },
         { key = "cul_sp",    name = "SP",          spellName = { "Whispers of C'thun" }, icon = "inv_knife_1h_artifactcthun_d_06", range = 30 },
         { key = "cul_mp5",    name = "MP5",          spellName = { "Whispers of Y'shaarj" }, icon = "ability_garrosh_touch_of_yshaarj", range = 30 },
-        { key = "cul_stats",    name = "All Stats %",          spellName = { "Whispers of N'Zoth" }, icon = "achivement_nzothraid_nzoth", range = 30 },
+        { key = "cul_stats",    name = "All Stats %",          spellName = { "Whispers of N'Zoth" }, icon = "achievement_nzothraid_nzoth", range = 30 },
         { key = "cul_reduce_spell_damage_taken_and_heal",    name = "Reduce Spell DMG taken and Heal",          spellName = { "Whispers of Yogg-Saron" }, icon = "void_tinged_trinket", range = 30 },
         { key = "nec_stamina",    name = "Stamina",          spellName = { "Foul Mandate" }, icon = "inv_mawratgreen", range = 30 },
         { key = "nec_sp",    name = "SP",          spellName = { "Grim Mandate" }, icon = "inv_mawratblue", range = 30 },
@@ -106,6 +106,7 @@ BuffPlanerDB = BuffPlanerDB or {
     minimap = {},
     buttonPos = {}, -- Stored per character: ["CharacterName - Realm"] = { point, x, y }
     buttonSize = 60, -- Per character size setting
+    showSolo = true,
 }
 
 -- Merge DB with defaults on first load
@@ -117,12 +118,14 @@ function BuffPlaner_InitializeDB()
             minimap = {},
             buttonPos = {},
             buttonSize = 60,
+            showSolo = true,
         }
     end
     if not BuffPlanerDB.selections then BuffPlanerDB.selections = {} end
     if not BuffPlanerDB.minimap then BuffPlanerDB.minimap = {} end
     if not BuffPlanerDB.buttonPos then BuffPlanerDB.buttonPos = {} end
     if not BuffPlanerDB.buttonSize then BuffPlanerDB.buttonSize = 60 end
+    if BuffPlanerDB.showSolo == nil then BuffPlanerDB.showSolo = true end
 end
 
 -- Get the list of available buffs (from DB or default)

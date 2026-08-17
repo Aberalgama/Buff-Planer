@@ -58,6 +58,7 @@ function BuffPlaner_OnLoad(self)
 
         -- Apply saved button size
         BuffPlaner_ApplyButtonSize(BuffPlanerDB.buttonSize or 60)
+        BuffPlaner_RefreshButtonVisibility()
     end
 
     BuffPlaner_Print("Buff Planer geladen. /buffplaner zum Öffnen.");
@@ -79,10 +80,12 @@ EventFrame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_TARGET_CHANGED" then
         if BuffPlaner_DragButton then
             if event == "PLAYER_ENTERING_WORLD" then BuffPlaner_LoadButtonPosition(BuffPlaner_DragButton) end
+            BuffPlaner_RefreshButtonVisibility()
             BuffPlaner_UpdateBuffButton()
         end
         if event == "PLAYER_ENTERING_WORLD" then BuffPlaner_RequestSync() end
     elseif event == "PARTY_MEMBERS_CHANGED" then
+        BuffPlaner_RefreshButtonVisibility()
         BuffPlaner_RequestSync()
         if BuffPlaner_ConfigFrame and BuffPlaner_ConfigFrame:IsVisible() then BuffPlaner_OnConfigShow() end
     elseif event == "CHAT_MSG_ADDON" and arg1 == SYNC_PREFIX then
@@ -192,6 +195,10 @@ function BuffPlaner_SetTab(id)
         -- Initialize settings values
         if BuffPlaner_SettingsButtonSizeSlider then
             BuffPlaner_SettingsButtonSizeSlider:SetValue(BuffPlanerDB.buttonSize or 60)
+        end
+        if BuffPlaner_SettingsShowSoloCheckbox then
+            -- SetChecked(true) for WotLK is 1
+            BuffPlaner_SettingsShowSoloCheckbox:SetChecked(BuffPlanerDB.showSolo and 1 or nil)
         end
     end
 end
@@ -365,6 +372,33 @@ function BuffPlaner_OnButtonSizeChanged(value)
     BuffPlaner_ApplyButtonSize(value)
 end
 
+function BuffPlaner_OnShowSoloChanged(value)
+    -- Robust check for 3.3.5: 1 is checked, nil is unchecked
+    BuffPlanerDB.showSolo = (value == 1 or value == true)
+    BuffPlaner_RefreshButtonVisibility()
+end
+
+function BuffPlaner_RefreshButtonVisibility()
+    local btn = BuffPlaner_DragButton
+    if not btn then return end
+
+    -- Strict check for "Is there actually another person?"
+    -- UnitExists("party1") or UnitExists("raid1") is the most reliable check for "Not Solo".
+    local inGroup = (UnitExists("party1") or UnitExists("raid1") or GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0)
+
+    -- Check if user manually hidden via /bp buffbutton
+    local k = UnitName("player") .. " - " .. GetRealmName()
+    local pos = BuffPlanerDB.buttonPos[k]
+    local userShow = (pos == nil or pos.show ~= false)
+
+    -- Logic: Show only if (Not manually hidden) AND (Actually in a Group OR "Show Solo" setting is ON)
+    if userShow and (inGroup or BuffPlanerDB.showSolo) then
+        btn:Show()
+    else
+        btn:Hide()
+    end
+end
+
 function BuffPlaner_UpdateBuffButton()
     local text, btn = BuffPlaner_DragButtonText, BuffPlaner_DragButton
     if not text or not btn then return end
@@ -516,14 +550,24 @@ end
 function BuffPlaner_ToggleBuffButton()
     local k = UnitName("player") .. " - " .. GetRealmName()
     if not BuffPlanerDB.buttonPos[k] then BuffPlanerDB.buttonPos[k] = {} end
-    if BuffPlaner_DragButton:IsVisible() then BuffPlaner_DragButton:Hide(); BuffPlanerDB.buttonPos[k].show = false
-    else BuffPlaner_DragButton:Show(); BuffPlanerDB.buttonPos[k].show = true end
+    if BuffPlaner_DragButton:IsVisible() then
+        BuffPlanerDB.buttonPos[k].show = false
+    else
+        BuffPlanerDB.buttonPos[k].show = true
+    end
+    BuffPlaner_RefreshButtonVisibility()
 end
 
 local updateTimer = 0;
 EventFrame:SetScript("OnUpdate", function(self, elapsed)
     updateTimer = updateTimer + elapsed;
-    if updateTimer >= 1 then updateTimer = 0; if BuffPlaner_DragButton and BuffPlaner_DragButton:IsVisible() then BuffPlaner_UpdateBuffButton() end end
+    if updateTimer >= 1 then
+        updateTimer = 0;
+        BuffPlaner_RefreshButtonVisibility()
+        if BuffPlaner_DragButton and BuffPlaner_DragButton:IsVisible() then
+            BuffPlaner_UpdateBuffButton()
+        end
+    end
 end);
 
 function BuffPlaner_OnSlashCommand(msg)

@@ -92,7 +92,7 @@
             <Frame name="BuffPlaner_SettingsPage" setAllPoints="true" hidden="true">
                 <Frames>
                     <!-- Button Size Setting Row -->
-                    <Frame name="$parentButtonSizeRow">
+                    <Frame name="BuffPlaner_SettingsButtonSizeRow">
                         <Size x="560" y="40"/>
                         <Anchors>
                             <Anchor point="TOPLEFT" x="20" y="-60"/>
@@ -124,11 +124,44 @@
                                         if BuffPlaner_OnButtonSizeChanged then
                                             BuffPlaner_OnButtonSizeChanged(value)
                                         end
-                                        local name = self:GetName()
-                                        -- Optional: Show current value in a tooltip or label
                                     </OnValueChanged>
                                 </Scripts>
                             </Slider>
+                        </Frames>
+                    </Frame>
+
+                    <!-- Show Solo Setting Row -->
+                    <Frame name="BuffPlaner_SettingsShowSoloRow">
+                        <Size x="560" y="40"/>
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeTo="BuffPlaner_SettingsButtonSizeRow" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString name="$parentLabel" inherits="GameFontHighlight" text="Show BUFF Button when not in party:">
+                                    <Anchors>
+                                        <Anchor point="LEFT"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Frames>
+                            <CheckButton name="BuffPlaner_SettingsShowSoloCheckbox">
+                                <Size x="26" y="26"/>
+                                <Anchors>
+                                    <Anchor point="LEFT" relativeTo="$parentLabel" relativePoint="RIGHT" x="10" y="0"/>
+                                </Anchors>
+                                <Scripts>
+                                    <OnClick>
+                                        BuffPlaner_OnShowSoloChanged(self:GetChecked())
+                                    </OnClick>
+                                </Scripts>
+                                <NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
+                                <PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
+                                <HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+                                <CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
+                                <DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+                            </CheckButton>
                         </Frames>
                     </Frame>
                 </Frames>
