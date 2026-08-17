@@ -535,18 +535,81 @@ function BuffPlaner_OnSlashCommand(msg)
     elseif cmd == "buffbutton" then
         BuffPlaner_ToggleBuffButton()
     elseif cmd == "find" and arg ~= "" then
-        BuffPlaner_Print("Searching icon for: |cff00ffff" .. arg .. "|r...")
-        local found = false
-        for i = 1, 120000 do
-            local name, _, icon = GetSpellInfo(i)
-            if name and name:lower() == arg:lower() then
-                local iconName = icon:match("([^%\\]+)$") or icon
-                BuffPlaner_Print("Found! |T" .. icon .. ":16|t Icon: |cff00ff00" .. iconName .. "|r (ID: " .. i .. ")")
-                found = true
-                break
+        local searchStr = arg:lower()
+        BuffPlaner_Print("Deep Scan for: |cff00ffff" .. searchStr .. "|r (Limit: 1.000.000)...")
+
+        -- 1. Check Spellbook first
+        local sbName, _, sbIcon = GetSpellInfo(arg)
+        if sbName then
+            local iconName = sbIcon:match("([^%\\]+)$") or sbIcon
+            BuffPlaner_Print("Found in Spellbook! |T" .. sbIcon .. ":16|t |cff00ff00" .. sbName .. "|r -> Icon: |cff00ffff" .. iconName .. "|r")
+            return
+        end
+
+        -- 2. Deep Scan Game Database
+        local foundCount = 0
+        for i = 1, 1000000 do
+            local n, _, t = GetSpellInfo(i)
+            if n then
+                local lowN = n:lower()
+                -- Match exact or partial
+                if lowN == searchStr or lowN:find(searchStr, 1, true) then
+                    local iconName = t:match("([^%\\]+)$") or t
+                    BuffPlaner_Print("Found! |T" .. t .. ":16|t |cff00ff00" .. n .. "|r -> Icon: |cff00ffff" .. iconName .. "|r (ID: " .. i .. ")")
+                    foundCount = foundCount + 1
+                    if foundCount >= 100 then
+                        BuffPlaner_Print("...showing first 100 results. Try a more specific name if needed.")
+                        break
+                    end
+                end
             end
         end
-        if not found then BuffPlaner_Print("|cffff0000Error:|r Could not find spell '" .. arg .. "'") end
+
+        if foundCount == 0 then
+            BuffPlaner_Print("|cffff0000Error:|r Could not find any spell matching '|cffffffff" .. arg .. "|r' up to ID 1,000,000.")
+        end
+    elseif cmd == "findall" then
+        BuffPlaner_Print("Scanning for ALL database spell icons (this will take a few seconds)...")
+        local buffs = BuffPlaner_GetBuffs()
+        local searchMap = {}
+        local results = {}
+        local foundCount = 0
+
+        -- Create a lookup map for names we need
+        for _, b in ipairs(buffs) do
+            local names = type(b.spellName) == "table" and b.spellName or { b.spellName }
+            for _, n in ipairs(names) do
+                searchMap[n:lower()] = { key = b.key, originalName = n }
+            end
+        end
+
+        -- Single pass scan through game database
+        for i = 1, 1000000 do
+            local n, _, t = GetSpellInfo(i)
+            if n then
+                local lowN = n:lower()
+                if searchMap[lowN] then
+                    local data = searchMap[lowN]
+                    if not results[data.key] then
+                        local iconName = t:match("([^%\\]+)$") or t
+                        results[data.key] = iconName
+                        foundCount = foundCount + 1
+                    end
+                end
+            end
+        end
+
+        -- Print results in copy-paste friendly format
+        BuffPlaner_Print("--- SCAN RESULTS (" .. foundCount .. " found) ---")
+        for _, b in ipairs(buffs) do
+            if results[b.key] then
+                print("|cff00ff00" .. b.key .. "|r -> icon = \"|cff00ffff" .. results[b.key] .. "|r\"")
+            else
+                print("|cffff0000" .. b.key .. "|r -> |cffffffffNOT FOUND|r (Check spell name: " .. (type(b.spellName) == "table" and b.spellName[1] or b.spellName) .. ")")
+            end
+        end
+        BuffPlaner_Print("--- END OF LIST ---")
+
     elseif cmd == "check" then
         for _, b in ipairs(BuffPlaner_GetBuffs()) do
             local c = type(b.spellName) == "table" and b.spellName[1] or b.spellName
