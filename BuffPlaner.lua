@@ -174,18 +174,36 @@ end
 -- Config UI
 -- =============================================================================
 
+function BuffPlaner_SetTab(id)
+    local frame = BuffPlaner_ConfigFrame
+    frame.numTabs = 2
+    PanelTemplates_SetTab(frame, id)
+
+    if id == 1 then
+        BuffPlaner_PlanerPage:Show()
+        BuffPlaner_SettingsPage:Hide()
+        BuffPlaner_OnConfigShow()
+    else
+        BuffPlaner_PlanerPage:Hide()
+        BuffPlaner_SettingsPage:Show()
+    end
+end
+
 function BuffPlaner_ToggleConfigWindow()
     if BuffPlaner_ConfigFrame:IsVisible() then
         BuffPlaner_ConfigFrame:Hide()
     else
-        local _, token = UnitClass("player")
-        BuffPlaner_Print("Detected your class as: |cff00ffff" .. (token or "UNKNOWN") .. "|r")
         BuffPlaner_RequestSync()
         BuffPlaner_ConfigFrame:Show()
     end
 end
 
 function BuffPlaner_OnConfigShow()
+    -- Initialize Tab System for the frame
+    BuffPlaner_ConfigFrame.numTabs = 2
+    PanelTemplates_UpdateTabs(BuffPlaner_ConfigFrame)
+
+    if not BuffPlaner_PlanerPage:IsVisible() then return end
     BuffPlaner_ConfigFrameTitle:SetText("Buff Planer");
 
     local _, myToken = UnitClass("player")
@@ -325,7 +343,8 @@ function BuffPlaner_UpdateBuffButton()
     for name, key in pairs(BuffPlaner.WishesFromOthers) do recipients[name] = key end
     if BuffPlanerDB.selections[myName] then recipients[myName] = BuffPlanerDB.selections[myName] end
 
-    -- Pass 1: Check Current Target (if valid player)
+    -- Pass 1: URGENT PASS - Find someone who is MISSING a buff
+    -- Priority 1.1: Current Target
     if UnitExists("target") and UnitIsPlayer("target") and not UnitIsDeadOrGhost("target") then
         local tName = GetCleanName(UnitName("target"))
         local desiredKey = recipients[tName]
@@ -333,18 +352,14 @@ function BuffPlaner_UpdateBuffButton()
             local b = BuffPlaner_GetBuffByKey(desiredKey)
             if b and UnitIsInRange("target", b) then
                 local has, exp = UnitHasBuff("target", b.spellName)
-                local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
                 if not has then
-                    someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, (UnitIsUnit("target", "player") and "player" or "target"), tName, spellToCast
-                else
-                    any, minExp = true, (exp - GetTime())
-                    targetUnitToken, targetName, castSpellName = (UnitIsUnit("target", "player") and "player" or "target"), tName, spellToCast
+                    someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, (UnitIsUnit("target", "player") and "player" or "target"), tName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
                 end
             end
         end
     end
 
-    -- Pass 2: Check Party/Raid Members
+    -- Priority 1.2: Anyone else in group
     if not someoneNeedsBuff then
         for _, info in ipairs(members) do
             local recipientName, unit = info.name, info.unit
@@ -352,20 +367,48 @@ function BuffPlaner_UpdateBuffButton()
             if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
                 local b = BuffPlaner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange(unit, b) then
-                    any = true;
                     local has, exp = UnitHasBuff(unit, b.spellName)
-                    local spellToCast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
-
                     if not has then
-                        someoneNeedsBuff = true;
-                        if not targetUnitToken then targetUnitToken, targetName, castSpellName = unit, recipientName, spellToCast end
-                    elseif exp and exp > 0 then
-                        local rem = exp - GetTime();
+                        someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, unit, recipientName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
+                        break -- Found someone who needs it, stop looking
+                    end
+                end
+            end
+        end
+    end
+
+    -- Pass 2: MAINTENANCE PASS - If everyone is buffed, find shortest timer
+    if not someoneNeedsBuff then
+        -- 2.1 Check Current Target first
+        if UnitExists("target") and UnitIsPlayer("target") and not UnitIsDeadOrGhost("target") then
+            local tName = GetCleanName(UnitName("target"))
+            local desiredKey = recipients[tName]
+            if desiredKey then
+                local b = BuffPlaner_GetBuffByKey(desiredKey)
+                if b and UnitIsInRange("target", b) then
+                    local has, exp = UnitHasBuff("target", b.spellName)
+                    if has and exp and exp > 0 then
+                        any, minExp = true, (exp - GetTime())
+                        targetUnitToken, targetName, castSpellName = (UnitIsUnit("target", "player") and "player" or "target"), tName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
+                    end
+                end
+            end
+        end
+
+        -- 2.2 Check everyone else
+        for _, info in ipairs(members) do
+            local recipientName, unit = info.name, info.unit
+            local desiredKey = recipients[recipientName]
+            if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
+                local b = BuffPlaner_GetBuffByKey(desiredKey)
+                if b and UnitIsInRange(unit, b) then
+                    local has, exp = UnitHasBuff(unit, b.spellName)
+                    if has and exp and exp > 0 then
+                        any = true
+                        local rem = exp - GetTime()
                         if rem < minExp then
                             minExp = rem
-                            if not targetUnitToken or not someoneNeedsBuff then
-                                targetUnitToken, targetName, castSpellName = unit, recipientName, spellToCast
-                            end
+                            targetUnitToken, targetName, castSpellName = unit, recipientName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
                         end
                     end
                 end
