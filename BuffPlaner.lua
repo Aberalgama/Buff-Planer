@@ -197,7 +197,11 @@ function BuffPlaner_OnConfigShow()
 
     local members, buffs = BuffPlaner_GetPartyMembers(), BuffPlaner_GetBuffs()
     local classBuffMap, scrollChild = BuffPlaner_DefaultConfig.classBuffs, BuffPlaner_ConfigFrameScrollChild
-    local startY, rowHeight = 0, 95
+
+    local startY = 2 -- Initial padding from top
+    local rowPadding = 4 -- Padding between rows
+    local hPadding = 2
+    local rowWidth = 518
 
     for _, info in ipairs(members) do
         local playerName, unit = info.name, info.unit
@@ -206,18 +210,34 @@ function BuffPlaner_OnConfigShow()
         local classColor = (classToken and RAID_CLASS_COLORS[classToken:upper()]) or { r=1, g=1, b=1 }
 
         local rowFrame = CreateFrame("Frame", nil, scrollChild)
-        rowFrame:SetSize(520, rowHeight); rowFrame:SetPoint("TOPLEFT", 10, -startY)
+        rowFrame:SetWidth(rowWidth) -- Slightly smaller for padding
+        rowFrame:SetPoint("TOPLEFT", hPadding, -startY) -- 10px padding from left
 
+        -- Add Border and Background to Row
+        rowFrame:SetBackdrop({
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 16,
+            insets = { left = 4, right = 4, top = 4, bottom = 4 }
+        })
+        rowFrame:SetBackdropColor(0, 0, 0, 0.4)
+
+        -- Class Icon (Centered Vertically)
         local classIcon = rowFrame:CreateTexture(nil, "OVERLAY")
-        classIcon:SetSize(24, 24); classIcon:SetPoint("LEFT", 5, 10)
+        classIcon:SetSize(24, 24); classIcon:SetPoint("LEFT", 10, 0)
         local coords = CLASS_ICON_TCOORDS[classToken]
         if coords then classIcon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes"); classIcon:SetTexCoord(unpack(coords)) end
 
+        -- Player Name (Centered Vertically)
         local nameText = rowFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        nameText:SetSize(120, rowHeight); nameText:SetPoint("LEFT", classIcon, "RIGHT", 5, 10); nameText:SetJustifyH("LEFT")
+        nameText:SetSize(110, 24); nameText:SetPoint("LEFT", classIcon, "RIGHT", 5, 0)
+        nameText:SetJustifyH("LEFT"); nameText:SetJustifyV("MIDDLE")
         nameText:SetText(playerName); nameText:SetTextColor(classColor.r, classColor.g, classColor.b)
 
         local selectedKey, renderIdx = BuffPlanerDB.selections[playerName], 1
+        local rowHeight = 46 -- Compact fixed height without labels
+        rowFrame:SetHeight(rowHeight)
+
         for _, buffKey in ipairs(allowedBuffs) do
             local buff = nil
             for _, b in ipairs(buffs) do if b.key == buffKey then buff = b; break end end
@@ -227,15 +247,17 @@ function BuffPlaner_OnConfigShow()
 
                 if knows then
                     local btn = CreateFrame("Button", nil, rowFrame)
-                    btn:SetSize(36, 36); btn:SetPoint("LEFT", nameText, "RIGHT", 10 + (renderIdx-1)*55, 15)
+                    btn:SetSize(34, 34);
+                    btn:SetPoint("LEFT", nameText, "RIGHT", 10 + (renderIdx-1)*42, 0) -- Compact spacing
+
+                    -- Spell Icon Texture
                     local _, _, spellIcon = GetSpellInfo(castName)
                     local icon = btn:CreateTexture(nil, "BACKGROUND"); icon:SetAllPoints(btn); icon:SetTexture(spellIcon or "Interface\\Icons\\" .. (buff.icon or "INV_Misc_QuestionMark"))
+                    btn.icon = icon
+
                     btn:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", tile=true, tileSize=16, edgeSize=12, insets={left=2,right=2,top=2,bottom=2}})
                     if selectedKey == buff.key then btn:SetBackdropBorderColor(0, 1, 0, 1); icon:SetVertexColor(1, 1, 1, 1)
                     else btn:SetBackdropBorderColor(0.3, 0.3, 0.3, 1); icon:SetVertexColor(0.4, 0.4, 0.4, 1) end
-
-                    local label = rowFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-                    label:SetPoint("TOP", btn, "BOTTOM", 0, -2); label:SetText(buff.name); label:SetWidth(48); label:SetJustifyH("CENTER")
 
                     btn.buffKey, btn.playerName = buff.key, playerName
                     btn:SetScript("OnClick", function(s)
@@ -244,13 +266,20 @@ function BuffPlaner_OnConfigShow()
                         BuffPlaner_BroadcastWishes()
                         BuffPlaner_OnConfigShow()
                     end)
-                    btn:SetScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_RIGHT"); GameTooltip:SetText(buff.name, 1, 1, 1); GameTooltip:AddLine(castName, 0.7, 0.7, 0.7); GameTooltip:Show() end)
+                    btn:SetScript("OnEnter", function(s)
+                        GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
+                        GameTooltip:SetText(buff.name, 1, 1, 1)
+                        GameTooltip:AddLine(castName, 0.7, 0.7, 0.7)
+                        GameTooltip:Show()
+                    end)
                     btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
                     renderIdx = renderIdx + 1
                 end
             end
         end
-        BuffPlaner_PlayerRows[#BuffPlaner_PlayerRows+1] = rowFrame; startY = startY + rowHeight
+
+        BuffPlaner_PlayerRows[#BuffPlaner_PlayerRows+1] = rowFrame
+        startY = startY + rowHeight + rowPadding
     end
     scrollChild:SetHeight(startY + 10)
 end
