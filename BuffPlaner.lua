@@ -55,6 +55,9 @@ function BuffPlaner_OnLoad(self)
         BuffPlaner_DragButton:SetAttribute("type", "macro")
         BuffPlaner_DragButton:SetAttribute("unit", nil)
         BuffPlaner_DragButton:SetAttribute("spell", nil)
+
+        -- Apply saved button size
+        BuffPlaner_ApplyButtonSize(BuffPlanerDB.buttonSize or 60)
     end
 
     BuffPlaner_Print("Buff Planer geladen. /buffplaner zum Öffnen.");
@@ -186,6 +189,10 @@ function BuffPlaner_SetTab(id)
     else
         BuffPlaner_PlanerPage:Hide()
         BuffPlaner_SettingsPage:Show()
+        -- Initialize settings values
+        if BuffPlaner_SettingsButtonSizeSlider then
+            BuffPlaner_SettingsButtonSizeSlider:SetValue(BuffPlanerDB.buttonSize or 60)
+        end
     end
 end
 
@@ -330,9 +337,23 @@ local function UnitIsInRange(unit, buff)
     return CheckInteractDistance(unit, 4)
 end
 
+function BuffPlaner_ApplyButtonSize(size)
+    if not BuffPlaner_DragButton then return end
+    BuffPlaner_DragButton:SetSize(size, size)
+    BuffPlanerDB.buttonSize = size
+    BuffPlaner_UpdateBuffButton() -- Refresh text scaling
+end
+
+function BuffPlaner_OnButtonSizeChanged(value)
+    BuffPlaner_ApplyButtonSize(value)
+end
+
 function BuffPlaner_UpdateBuffButton()
     local text, btn = BuffPlaner_DragButtonText, BuffPlaner_DragButton
     if not text or not btn then return end
+
+    local size = BuffPlanerDB.buttonSize or 60
+    local font, _, flags = text:GetFont()
 
     local members = BuffPlaner_GetPartyMembers()
     local someoneNeedsBuff, minExp, any = false, 999999, false
@@ -351,7 +372,7 @@ function BuffPlaner_UpdateBuffButton()
         if desiredKey then
             local b = BuffPlaner_GetBuffByKey(desiredKey)
             if b and UnitIsInRange("target", b) then
-                local has, exp = UnitHasBuff("target", b.spellName)
+                local has = UnitHasBuff("target", b.spellName)
                 if not has then
                     someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, (UnitIsUnit("target", "player") and "player" or "target"), tName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
                 end
@@ -431,18 +452,18 @@ function BuffPlaner_UpdateBuffButton()
     end
 
     if someoneNeedsBuff then
-        text:SetFontObject("GameFontNormalLarge")
+        text:SetFont(font, size * 0.28, flags)
         text:SetText("BUFF");
         btn:SetBackdropColor(0.8, 0, 0, 1)
     elseif any then
-        text:SetFontObject("GameFontNormalLarge")
+        text:SetFont(font, size * 0.28, flags)
         if minExp < 999999 then
             local m, s = math.floor(minExp/60), math.floor(minExp%60)
             text:SetText(string.format("%d:%02d", m, s))
         else text:SetText("OK") end
         btn:SetBackdropColor(0, 0.6, 0, 1)
     else
-        text:SetFontObject("GameFontNormalSmall")
+        text:SetFont(font, size * 0.18, flags)
         text:SetText("Select\nBuff");
         btn:SetBackdropColor(0.2, 0.2, 0.2, 0.8)
     end

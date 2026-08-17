@@ -90,15 +90,49 @@
 
             <!-- ================= PAGE 2: SETTINGS ================= -->
             <Frame name="BuffPlaner_SettingsPage" setAllPoints="true" hidden="true">
-                <Layers>
-                    <Layer level="ARTWORK">
-                        <FontString inherits="GameFontNormalLarge" text="Settings">
-                            <Anchors>
-                                <Anchor point="TOP" x="0" y="-45"/>
-                            </Anchors>
-                        </FontString>
-                    </Layer>
-                </Layers>
+                <Frames>
+                    <!-- Button Size Setting Row -->
+                    <Frame name="$parentButtonSizeRow">
+                        <Size x="560" y="40"/>
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="20" y="-60"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString name="$parentLabel" inherits="GameFontHighlight" text="BUFF Button size:">
+                                    <Anchors>
+                                        <Anchor point="LEFT"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Frames>
+                            <Slider name="BuffPlaner_SettingsButtonSizeSlider" inherits="OptionsSliderTemplate">
+                                <Size x="200" y="16"/>
+                                <Anchors>
+                                    <Anchor point="LEFT" relativeTo="$parentLabel" relativePoint="RIGHT" x="20" y="-2"/>
+                                </Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        local name = self:GetName()
+                                        _G[name.."Low"]:SetText("30")
+                                        _G[name.."High"]:SetText("120")
+                                        self:SetMinMaxValues(30, 120)
+                                        self:SetValueStep(1)
+                                        self:SetObeyStepOnDrag(true)
+                                    </OnLoad>
+                                    <OnValueChanged>
+                                        if BuffPlaner_OnButtonSizeChanged then
+                                            BuffPlaner_OnButtonSizeChanged(value)
+                                        end
+                                        local name = self:GetName()
+                                        -- Optional: Show current value in a tooltip or label
+                                    </OnValueChanged>
+                                </Scripts>
+                            </Slider>
+                        </Frames>
+                    </Frame>
+                </Frames>
             </Frame>
 
             <!-- ================= TABS ================= -->
