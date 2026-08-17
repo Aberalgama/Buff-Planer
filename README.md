@@ -1,6 +1,36 @@
-## Tired of not getting buffs from other players or if you get them, they are not that what you want? <br>Tired of asking people what they want?
-### This Addon will solve this and some other issues in an easy way! <br>All you need to do is just open Buff Planer by clicking it near minimap or by typing /bp and you will see all your party members with buffs that they can give you. Now you can hover over this buffs to see what they give and select 1 buff from each player. That´s it! As soon as other players (or you) will select buffs that they want from you, you will see BUFF button and you will only need to click it. Addon will recognize which player wants which buff and buff them. After all players got theyr buffs, you will also see remaining time on the same button.
+## Tired of not getting the buffs you need - or getting buffs that aren't useful to you?
+### Tired of constantly asking other players which buffs they want?
 
-Now explained more detailed.<br>When someone (or you) select buffs from you AND you will be in range with this players, this addon will check if they already have requested buff from you or not. If not you will see a red BUFF button. By clicking on it you will buff this player and addon will check if there are more party members with configured buffs but dont have them. If so, than you will still see red BUFF button.<br>When all party members in your range got theyr buffs you will see counter of the buff that will expire soon.<br>If you need to prioritize some player, just target it and click on BUFF button, it will detect players requested buff and buff it.
+**Buff Planer** solves these problems in a simple and convenient way!
 
-### Additional settings can be found in the corresponding "Settings" Tab below.
+Simply open Buff Planer by clicking the button near your minimap or by typing `/bp`. You will see all of your party members along with the buffs they can provide.
+
+Hover over a buff to see exactly what it does, then select **one buff from each player** that you would like to receive. That's it!
+
+Whenever another player selects one of your buffs, you will see a **BUFF** button. Simply click it, and Buff Planer will automatically determine which player needs which buff and cast it on them.
+
+Once all requested buffs have been applied, the same button will display the **remaining duration of the buff that expires soonest**.
+
+### How does it work?
+
+When another player (or you) selects one of your buffs and that player is within range, Buff Planer checks whether they already have the requested buff.
+
+If they don't, the **BUFF** button will turn red.
+
+Clicking the button will buff the appropriate player. Buff Planer will then immediately check whether any other nearby party members are still missing one of their requested buffs.
+
+- If someone still needs a buff, the **BUFF** button remains red.
+- If everyone in range has received their requested buffs, the button will display a countdown showing the remaining duration of the buff that will expire first.
+
+### Want to prioritize a specific player?
+
+Simply target the player and click the **BUFF** button.
+
+Buff Planer will automatically detect which buff that player has requested from you and cast it on them first.
+
+### Buff is red? 
+This addon shows you all the buffs that your party members can provide. Buffs highlighted in red indicate that the corresponding player has not learned that buff and therefore cannot provide it. These buffs cannot be selected.
+
+### Additional Settings
+
+Additional options and customization can be found in the **Settings** tab below.

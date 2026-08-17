@@ -105,6 +105,7 @@ BuffPlanerDB = BuffPlanerDB or {
     enabled = true,
     minimap = {},
     buttonPos = {}, -- Stored per character: ["CharacterName - Realm"] = { point, x, y }
+    buttonSize = 60, -- Per character size setting
 }
 
 -- Merge DB with defaults on first load
@@ -115,17 +116,13 @@ function BuffPlaner_InitializeDB()
             enabled = true,
             minimap = {},
             buttonPos = {},
+            buttonSize = 60,
         }
     end
-    if not BuffPlanerDB.selections then
-        BuffPlanerDB.selections = {}
-    end
-    if not BuffPlanerDB.minimap then
-        BuffPlanerDB.minimap = {}
-    end
-    if not BuffPlanerDB.buttonPos then
-        BuffPlanerDB.buttonPos = {}
-    end
+    if not BuffPlanerDB.selections then BuffPlanerDB.selections = {} end
+    if not BuffPlanerDB.minimap then BuffPlanerDB.minimap = {} end
+    if not BuffPlanerDB.buttonPos then BuffPlanerDB.buttonPos = {} end
+    if not BuffPlanerDB.buttonSize then BuffPlanerDB.buttonSize = 60 end
 end
 
 -- Get the list of available buffs (from DB or default)
