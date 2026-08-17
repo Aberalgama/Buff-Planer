@@ -119,7 +119,6 @@
                                         _G[name.."High"]:SetText("120")
                                         self:SetMinMaxValues(30, 120)
                                         self:SetValueStep(1)
-                                        self:SetObeyStepOnDrag(true)
                                     </OnLoad>
                                     <OnValueChanged>
                                         if BuffPlaner_OnButtonSizeChanged then

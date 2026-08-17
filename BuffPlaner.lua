@@ -91,7 +91,7 @@ EventFrame:SetScript("OnEvent", function(self, event, ...)
 end);
 
 function BuffPlaner_Print(msg)
-    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg, 0, 1, 0.5);
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg);
 end
 
 function BuffPlaner_GetPartyMembers()
@@ -270,20 +270,33 @@ function BuffPlaner_OnConfigShow()
                 local castName = type(buff.spellName) == "table" and buff.spellName[1] or buff.spellName
                 local knows = (unit == "player") and GetSpellInfo(castName) or (BuffPlaner.RemoteKnownBuffs[playerName] and BuffPlaner.RemoteKnownBuffs[playerName][buff.key])
 
+                local btn = CreateFrame("Button", nil, rowFrame)
+                btn:SetSize(34, 34);
+                btn:SetPoint("LEFT", nameText, "RIGHT", 10 + (renderIdx-1)*42, 0) -- Compact spacing
+
+                -- Spell Icon Texture
+                local _, _, spellIcon = GetSpellInfo(castName)
+                local icon = btn:CreateTexture(nil, "BACKGROUND"); icon:SetAllPoints(btn)
+                icon:SetTexture(spellIcon or "Interface\\Icons\\" .. (buff.icon or "INV_Misc_QuestionMark"))
+                btn.icon = icon
+
+                btn:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", tile=true, tileSize=16, edgeSize=12, insets={left=2,right=2,top=2,bottom=2}})
+
+                if not knows then
+                    btn:SetBackdropBorderColor(1, 0, 0, 1) -- Red border for unknown
+                    icon:SetVertexColor(0.2, 0.2, 0.2, 0.8) -- Dimmed icon
+                    icon:SetDesaturated(true)
+                elseif selectedKey == buff.key then
+                    btn:SetBackdropBorderColor(0, 1, 0, 1) -- Green border for selected
+                    icon:SetVertexColor(1, 1, 1, 1)
+                    icon:SetDesaturated(false)
+                else
+                    btn:SetBackdropBorderColor(0.3, 0.3, 0.3, 1) -- Grey border for unselected known
+                    icon:SetVertexColor(0.4, 0.4, 0.4, 1)
+                    icon:SetDesaturated(false)
+                end
+
                 if knows then
-                    local btn = CreateFrame("Button", nil, rowFrame)
-                    btn:SetSize(34, 34);
-                    btn:SetPoint("LEFT", nameText, "RIGHT", 10 + (renderIdx-1)*42, 0) -- Compact spacing
-
-                    -- Spell Icon Texture
-                    local _, _, spellIcon = GetSpellInfo(castName)
-                    local icon = btn:CreateTexture(nil, "BACKGROUND"); icon:SetAllPoints(btn); icon:SetTexture(spellIcon or "Interface\\Icons\\" .. (buff.icon or "INV_Misc_QuestionMark"))
-                    btn.icon = icon
-
-                    btn:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", tile=true, tileSize=16, edgeSize=12, insets={left=2,right=2,top=2,bottom=2}})
-                    if selectedKey == buff.key then btn:SetBackdropBorderColor(0, 1, 0, 1); icon:SetVertexColor(1, 1, 1, 1)
-                    else btn:SetBackdropBorderColor(0.3, 0.3, 0.3, 1); icon:SetVertexColor(0.4, 0.4, 0.4, 1) end
-
                     btn.buffKey, btn.playerName = buff.key, playerName
                     btn:SetScript("OnClick", function(s)
                         local cur = BuffPlanerDB.selections[s.playerName]
@@ -291,15 +304,19 @@ function BuffPlaner_OnConfigShow()
                         BuffPlaner_BroadcastWishes()
                         BuffPlaner_OnConfigShow()
                     end)
-                    btn:SetScript("OnEnter", function(s)
-                        GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
-                        GameTooltip:SetText(buff.name, 1, 1, 1)
-                        GameTooltip:AddLine(castName, 0.7, 0.7, 0.7)
-                        GameTooltip:Show()
-                    end)
-                    btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-                    renderIdx = renderIdx + 1
                 end
+
+                btn:SetScript("OnEnter", function(s)
+                    GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
+                    local header = buff.name
+                    if not knows then header = header .. " |cffff0000(not available)|r" end
+                    GameTooltip:SetText(header, 1, 1, 1)
+                    GameTooltip:AddLine(castName, 0.7, 0.7, 0.7)
+                    GameTooltip:Show()
+                end)
+                btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+                renderIdx = renderIdx + 1
             end
         end
 
@@ -510,14 +527,34 @@ EventFrame:SetScript("OnUpdate", function(self, elapsed)
 end);
 
 function BuffPlaner_OnSlashCommand(msg)
-    if msg == "config" then BuffPlaner_ToggleConfigWindow()
-    elseif msg == "buffbutton" then BuffPlaner_ToggleBuffButton()
-    elseif msg == "check" then
+    local cmd, arg = msg:match("^(%S*)%s*(.*)$")
+    cmd = cmd:lower()
+
+    if cmd == "" or cmd == "config" then
+        BuffPlaner_ToggleConfigWindow()
+    elseif cmd == "buffbutton" then
+        BuffPlaner_ToggleBuffButton()
+    elseif cmd == "find" and arg ~= "" then
+        BuffPlaner_Print("Searching icon for: |cff00ffff" .. arg .. "|r...")
+        local found = false
+        for i = 1, 120000 do
+            local name, _, icon = GetSpellInfo(i)
+            if name and name:lower() == arg:lower() then
+                local iconName = icon:match("([^%\\]+)$") or icon
+                BuffPlaner_Print("Found! |T" .. icon .. ":16|t Icon: |cff00ff00" .. iconName .. "|r (ID: " .. i .. ")")
+                found = true
+                break
+            end
+        end
+        if not found then BuffPlaner_Print("|cffff0000Error:|r Could not find spell '" .. arg .. "'") end
+    elseif cmd == "check" then
         for _, b in ipairs(BuffPlaner_GetBuffs()) do
             local c = type(b.spellName) == "table" and b.spellName[1] or b.spellName
             local n, _, t = GetSpellInfo(c)
             if n then BuffPlaner_Print(string.format("|T%s:16|t %s -> |cff00ffff%s|r", t, n, t:match("([^%\\]+)$") or t))
             else BuffPlaner_Print("|cffff0000Error:|r Spell '"..c.."' not found!") end
         end
-    else BuffPlaner_Print("/bp config, /bp buffbutton, or /bp check") end
+    else
+        BuffPlaner_Print("Usage: /bp or /bp config, /bp buffbutton, /bp find [Name], /bp check")
+    end
 end
