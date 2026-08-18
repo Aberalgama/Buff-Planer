@@ -8,18 +8,9 @@ BuffPlaner = LibStub('AceAddon-3.0'):NewAddon('BuffPlaner', 'AceEvent-3.0', 'Ace
 -- Runtime data
 BuffPlaner.RemoteKnownBuffs = {}
 BuffPlaner.WishesFromOthers = {} -- [CleanName] = buffKey
+BuffPlaner.HasAddon = {} -- [CleanName] = true
 local SYNC_PREFIX = "BP_SYNC"
 BuffPlaner_PlayerRows = {};
-
--- Register default locale
-local L = LibStub("AceLocale-3.0"):NewLocale("BuffPlaner", "enUS", true)
-if L then
-    L["Buff Planer"] = true
-    L["Minimap Icon geklickt!"] = true
-    L["Rechtsklick zum Öffnen der Konfiguration"] = true
-    L["Linksklick zum Öffnen der Konfiguration"] = true
-end
-L = LibStub("AceLocale-3.0"):GetLocale("BuffPlaner")
 
 local LDB = LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LibStub("LibDBIcon-1.0", true)
@@ -34,13 +25,13 @@ end
 local function createLDBLauncher()
     local LDBObj = LibStub("LibDataBroker-1.1"):NewDataObject("BuffPlaner", {
         type = "launcher",
-        label = L["Buff Planer"],
+        label = "Buff Planer",
         OnClick = function() BuffPlaner_ToggleConfigWindow() end,
         icon = "Interface\\Icons\\spell_arcane_arcaneresilience",
         OnTooltipShow = function(tooltip)
             if not tooltip or not tooltip.AddLine then return end
-            tooltip:AddLine(L["Buff Planer"])
-            tooltip:AddLine("|cffffff00" .. L["Linksklick zum Öffnen der Konfiguration"])
+            tooltip:AddLine("Buff Planer")
+            tooltip:AddLine("|cffffff00Left click to open Buff Planer.")
         end,
     })
     if LDBIcon then LDBIcon:Register("BuffPlaner", LDBObj, BuffPlanerDB.minimap) end
@@ -95,7 +86,7 @@ EventFrame:SetScript("OnEvent", function(self, event, ...)
 end);
 
 function BuffPlaner_Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg);
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg);
 end
 
 function BuffPlaner_GetPartyMembers()
@@ -151,6 +142,10 @@ end
 function BuffPlaner_HandleSync(message, sender)
     local cleanSender = GetCleanName(sender)
     if cleanSender == GetCleanName(UnitName("player")) then return end
+
+    -- Anyone who sends a message has the addon
+    BuffPlaner.HasAddon[cleanSender] = true
+
     local mode = GetNumRaidMembers() > 0 and "RAID" or "PARTY"
 
     if message == "REQ" then
@@ -276,6 +271,8 @@ function BuffPlaner_OnConfigShow()
             for _, b in ipairs(buffs) do if b.key == buffKey then buff = b; break end end
             if buff then
                 local castName = type(buff.spellName) == "table" and buff.spellName[1] or buff.spellName
+
+                local hasAddon = (unit == "player") or BuffPlaner.HasAddon[playerName]
                 local knows = (unit == "player") and GetSpellInfo(castName) or (BuffPlaner.RemoteKnownBuffs[playerName] and BuffPlaner.RemoteKnownBuffs[playerName][buff.key])
 
                 local btn = CreateFrame("Button", nil, rowFrame)
@@ -290,8 +287,8 @@ function BuffPlaner_OnConfigShow()
 
                 btn:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", tile=true, tileSize=16, edgeSize=12, insets={left=2,right=2,top=2,bottom=2}})
 
-                if not knows then
-                    btn:SetBackdropBorderColor(1, 0, 0, 1) -- Red border for unknown
+                if not hasAddon or not knows then
+                    btn:SetBackdropBorderColor(1, 0, 0, 1) -- Red border for unknown/no addon
                     icon:SetVertexColor(0.2, 0.2, 0.2, 0.8) -- Dimmed icon
                     icon:SetDesaturated(true)
                 elseif selectedKey == buff.key then
@@ -304,7 +301,7 @@ function BuffPlaner_OnConfigShow()
                     icon:SetDesaturated(false)
                 end
 
-                if knows then
+                if hasAddon and knows then
                     btn.buffKey, btn.playerName = buff.key, playerName
                     btn:SetScript("OnClick", function(s)
                         local cur = BuffPlanerDB.selections[s.playerName]
@@ -317,7 +314,11 @@ function BuffPlaner_OnConfigShow()
                 btn:SetScript("OnEnter", function(s)
                     GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
                     local header = buff.name
-                    if not knows then header = header .. " |cffff0000(not available)|r" end
+                    if not hasAddon then
+                        header = header .. " |cffff0000(addon not available)|r"
+                    elseif not knows then
+                        header = header .. " |cffff0000(not available)|r"
+                    end
                     GameTooltip:SetText(header, 1, 1, 1)
                     GameTooltip:AddLine(castName, 0.7, 0.7, 0.7)
                     GameTooltip:Show()
@@ -593,6 +594,7 @@ function BuffPlaner_OnSlashCommand(msg)
         BuffPlaner_ToggleConfigWindow()
     elseif cmd == "buffbutton" then
         BuffPlaner_ToggleBuffButton()
+    --[[
     elseif cmd == "find" and arg ~= "" then
         local searchStr = arg:lower()
         BuffPlaner_Print("Deep Scan for: |cff00ffff" .. searchStr .. "|r (Limit: 1.000.000)...")
@@ -668,7 +670,8 @@ function BuffPlaner_OnSlashCommand(msg)
             end
         end
         BuffPlaner_Print("--- END OF LIST ---")
-
+    ]]
+    --[[
     elseif cmd == "check" then
         for _, b in ipairs(BuffPlaner_GetBuffs()) do
             local c = type(b.spellName) == "table" and b.spellName[1] or b.spellName
@@ -676,7 +679,8 @@ function BuffPlaner_OnSlashCommand(msg)
             if n then BuffPlaner_Print(string.format("|T%s:16|t %s -> |cff00ffff%s|r", t, n, t:match("([^%\\]+)$") or t))
             else BuffPlaner_Print("|cffff0000Error:|r Spell '"..c.."' not found!") end
         end
+    ]]
     else
-        BuffPlaner_Print("Usage: /bp or /bp config, /bp buffbutton, /bp find [Name], /bp check")
+        BuffPlaner_Print("Usage: /bp or /bp config, /bp buffbutton")
     end
 end
