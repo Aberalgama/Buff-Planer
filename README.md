@@ -121,3 +121,12 @@ Buffs like **C**, which can be applied independently and do not conflict with or
 I'm not an expert addon developer, and I had to manually add **47 different buffs**, including their icons, spell names, and other information. I've tested some of them, but not every single one.
 
 So there may still be some bugs or edge cases. If you encounter something that doesn't work correctly, please let me know!
+
+## ❤️ Support Buff Planer
+
+If you enjoy using Buff Planer and would like to support its development, you can do so through GitHub Sponsors or PayPal.
+
+- [💜 GitHub Sponsors](https://github.com/sponsors/Aberalgama)
+- [💙 PayPal](https://paypal.me/svSalzmannViktor)
+
+Every contribution is greatly appreciated and helps support further development of the addon!
