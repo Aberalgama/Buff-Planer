@@ -11,6 +11,16 @@ Whenever another player selects one of your buffs, you will see a **BUFF** butto
 
 Once all requested buffs have been applied, the same button will display the **remaining duration of the buff that expires soonest**.
 
+### Images
+
+![Select Buff](img/select_buff.png)
+![Buff](img/buff.png)
+![Buffed](img/buffed.png)
+![Hover Available](img/hover_buff_available.png)
+![Hover Addon Not Available](img/hover_addon_not_available.png)
+![Hover Buff Not Available](img/hover_buff_not_available.png)
+
+
 ### What Buffs Does Buff Planer Handle?
 
 Buff Planer focuses on **buffs where there is an actual choice between different options**.
