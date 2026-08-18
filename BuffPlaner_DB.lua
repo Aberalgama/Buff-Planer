@@ -34,7 +34,7 @@ BuffPlaner_DefaultConfig = {
         { key = "rea_stamina",    name = "Stamina",          spellName = { "Rite of Resolve" }, icon = "ui_sigil_venthyr", range = 40 },
         { key = "rea_str",    name = "STR",          spellName = { "Rite of Power" }, icon = "ui_sigil_necrolord", range = 40 },
         { key = "ven_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Beetle Pheromones" }, icon = "inv_progenitorbeetlegreen", range = 40 },
-        { key = "ven_sp",    name = "SP",          spellName = { "Toxic Pheromones" }, icon = "epic_rpg_icon_pack_position_icon_0003s_0000_cloud_Border", range = 40 },
+        { key = "ven_sp",    name = "SP",          spellName = { "Toxic Pheromones" }, icon = "epic_rpg_icon_pack_poison_icon_0003s_0000_cloud_Border", range = 40 },
         { key = "ven_agi",    name = "AGI",          spellName = { "Spider Pheromones" }, icon = "nhi_spiderweb_Border", range = 40 },
         { key = "chr_int",    name = "INT",          spellName = { "Nozdormu's Wisdom" }, icon = "Nozdormu_Wisdom", range = 40 },
         { key = "chr_spirit",    name = "Spirit",          spellName = { "Chromie's Wisdom" }, icon = "Chromies_Wisdom", range = 40 },
