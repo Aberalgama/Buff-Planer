@@ -11,6 +11,16 @@ Whenever another player selects one of your buffs, you will see a **BUFF** butto
 
 Once all requested buffs have been applied, the same button will display the **remaining duration of the buff that expires soonest**.
 
+### What Buffs Does Buff Planer Handle?
+
+Buff Planer focuses on **buffs where there is an actual choice between different options**.
+
+For example, if a player can provide three buffs - **A, B, and C** - and **A and B are mutually exclusive options**, while **C can be applied independently alongside either A or B**, only **A and B** will be displayed in Buff Planer.
+
+Independent buffs like **C** are intentionally not included, because they don't require any choice or coordination between players. These buffs can simply be applied separately whenever needed.
+
+This keeps Buff Planer focused on the buffs that actually require coordination, while avoiding unnecessary clutter from buffs that can be handled independently.
+
 ### How to Install
 
 1. Download the addon by clicking the green **`<> Code`** button and selecting **Download ZIP**.
@@ -65,6 +75,16 @@ You can use either `/bp` or `/buffplaner` to interact with the addon:
 **A:** Partially. You can still see all the available buffs that your teammates can provide and select the ones you want. You will then need to ask them manually for the buffs.
 
 However, the real power of Buff Planer comes when **all or most party members are using the addon**. That's when the buff requests and buffing process can happen automatically.
+
+---
+
+**Q: Why aren't all buffs from my class or other classes displayed?**
+
+**A:** Buff Planer is designed to display only buffs where there is an actual choice between different options.
+
+For example, if a player can provide three buffs: **A, B, and C**, and **A and B are mutually exclusive options**, while **C can be applied independently in addition to either A or B**, only **A and B** will be displayed in Buff Planer.
+
+Buffs like **C**, which can be applied independently and do not conflict with or replace any other buff, are intentionally not shown. These buffs need to be handled manually by the players.
 
 ---
 

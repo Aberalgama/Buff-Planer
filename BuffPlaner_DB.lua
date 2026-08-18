@@ -51,7 +51,7 @@ BuffPlaner_DefaultConfig = {
         { key = "wit_cost_reduction",    name = "Cost Reduction",          spellName = { "Resourceful Wuju" }, icon = "custom_T_Nhance_RPG_Icons_ShadowPotion_Border", range = 30 },
         { key = "wit_doc_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Knight's Edict" }, icon = "WH_Knight_Edict", range = 40 },
         { key = "wit_doc_agi",    name = "AGI",          spellName = { "Inquisitor's Edict" }, icon = "WH_Inquis_Edict", range = 40 },
-        { key = "wit_doc_sp",    name = "SP",          spellName = { "Witching Edict" }, icon = "WH_Withing_Edict", range = 40 },
+        { key = "wit_doc_sp",    name = "SP",          spellName = { "Witching Edict" }, icon = "WH_Witching_Edict", range = 40 },
         { key = "kox_stamina_frost",    name = "Stamina + Frost Resi",          spellName = { "Mark of Rivendare" }, icon = "Spell_DeathKnight_SummonDeathCharger", range = 40 },
         { key = "kox_cost_reduction_arcane",    name = "Cost Reduction + Arcane Resi",          spellName = { "Mark of Zeliek" }, icon = "ability_deathknight_asphixiate", range = 40 },
         { key = "kox_sp_shadow",    name = "SP + Shadow Resi",          spellName = { "Mark of Blaumeux" }, icon = "inv_helm_mail_raidshamanprimalist_d_01_fire", range = 40 },
