@@ -61,6 +61,10 @@ Simply target the player and click the **BUFF** button.
 
 Buff Planer will automatically detect which buff that player has requested from you and cast it on them first.
 
+### Move BUFF Button
+
+To move BUFF / Select Buff button you need to press 'alt' + left click.
+
 ### Why Is a Buff Red?
 
 Buff Planer shows you all the buffs that your party members can potentially provide.

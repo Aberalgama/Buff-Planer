@@ -32,6 +32,7 @@ local function createLDBLauncher()
             if not tooltip or not tooltip.AddLine then return end
             tooltip:AddLine("Buff Planer")
             tooltip:AddLine("|cffffff00Left click to open Buff Planer.")
+            tooltip:AddLine("|cffffff00Alt + Left click & drag to move BUFF button.")
         end,
     })
     if LDBIcon then LDBIcon:Register("BuffPlaner", LDBObj, BuffPlanerDB.minimap) end
