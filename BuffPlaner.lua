@@ -56,8 +56,9 @@ function BuffPlaner_OnLoad(self)
         BuffPlaner_DragButton:SetAttribute("unit", nil)
         BuffPlaner_DragButton:SetAttribute("spell", nil)
 
-        -- Apply saved button size
-        BuffPlaner_ApplyButtonSize(BuffPlanerDB.buttonSize or 60)
+        -- Apply character-specific settings
+        local settings = BuffPlaner_GetCharSettings()
+        BuffPlaner_ApplyButtonSize(settings.buttonSize)
         BuffPlaner_RefreshButtonVisibility()
     end
 
@@ -192,13 +193,13 @@ function BuffPlaner_SetTab(id)
     else
         BuffPlaner_PlanerPage:Hide()
         BuffPlaner_SettingsPage:Show()
-        -- Initialize settings values
+
+        local settings = BuffPlaner_GetCharSettings()
         if BuffPlaner_SettingsButtonSizeSlider then
-            BuffPlaner_SettingsButtonSizeSlider:SetValue(BuffPlanerDB.buttonSize or 60)
+            BuffPlaner_SettingsButtonSizeSlider:SetValue(settings.buttonSize)
         end
         if BuffPlaner_SettingsShowSoloCheckbox then
-            -- SetChecked(true) for WotLK is 1
-            BuffPlaner_SettingsShowSoloCheckbox:SetChecked(BuffPlanerDB.showSolo and 1 or nil)
+            BuffPlaner_SettingsShowSoloCheckbox:SetChecked(settings.showSolo and 1 or nil)
         end
     end
 end
@@ -364,7 +365,10 @@ end
 function BuffPlaner_ApplyButtonSize(size)
     if not BuffPlaner_DragButton then return end
     BuffPlaner_DragButton:SetSize(size, size)
-    BuffPlanerDB.buttonSize = size
+
+    local settings = BuffPlaner_GetCharSettings()
+    settings.buttonSize = size
+
     BuffPlaner_UpdateBuffButton() -- Refresh text scaling
 end
 
@@ -373,8 +377,8 @@ function BuffPlaner_OnButtonSizeChanged(value)
 end
 
 function BuffPlaner_OnShowSoloChanged(value)
-    -- Robust check for 3.3.5: 1 is checked, nil is unchecked
-    BuffPlanerDB.showSolo = (value == 1 or value == true)
+    local settings = BuffPlaner_GetCharSettings()
+    settings.showSolo = (value == 1 or value == true)
     BuffPlaner_RefreshButtonVisibility()
 end
 
@@ -382,17 +386,12 @@ function BuffPlaner_RefreshButtonVisibility()
     local btn = BuffPlaner_DragButton
     if not btn then return end
 
-    -- Strict check for "Is there actually another person?"
-    -- UnitExists("party1") or UnitExists("raid1") is the most reliable check for "Not Solo".
     local inGroup = (UnitExists("party1") or UnitExists("raid1") or GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0)
 
-    -- Check if user manually hidden via /bp buffbutton
-    local k = UnitName("player") .. " - " .. GetRealmName()
-    local pos = BuffPlanerDB.buttonPos[k]
-    local userShow = (pos == nil or pos.show ~= false)
+    local settings = BuffPlaner_GetCharSettings()
+    local userShow = (settings.buttonPos.show ~= false)
 
-    -- Logic: Show only if (Not manually hidden) AND (Actually in a Group OR "Show Solo" setting is ON)
-    if userShow and (inGroup or BuffPlanerDB.showSolo) then
+    if userShow and (inGroup or settings.showSolo) then
         btn:Show()
     else
         btn:Hide()
@@ -403,7 +402,8 @@ function BuffPlaner_UpdateBuffButton()
     local text, btn = BuffPlaner_DragButtonText, BuffPlaner_DragButton
     if not text or not btn then return end
 
-    local size = BuffPlanerDB.buttonSize or 60
+    local settings = BuffPlaner_GetCharSettings()
+    local size = settings.buttonSize or 60
     local font, _, flags = text:GetFont()
 
     local members = BuffPlaner_GetPartyMembers()
@@ -534,26 +534,34 @@ end
 -- =============================================================================
 
 function BuffPlaner_SaveButtonPosition(frame)
-    local p, _, rp, x, y = frame:GetPoint(); local k = UnitName("player") .. " - " .. GetRealmName()
-    if not BuffPlanerDB.buttonPos[k] then BuffPlanerDB.buttonPos[k] = {} end
-    BuffPlanerDB.buttonPos[k].point, BuffPlanerDB.buttonPos[k].relativePoint = p, rp
-    BuffPlanerDB.buttonPos[k].xOfs, BuffPlanerDB.buttonPos[k].yOfs = x, y
+    local p, _, rp, x, y = frame:GetPoint()
+    local settings = BuffPlaner_GetCharSettings()
+
+    settings.buttonPos.point = p
+    settings.buttonPos.relativePoint = rp
+    settings.buttonPos.xOfs = x
+    settings.buttonPos.yOfs = y
 end
 
 function BuffPlaner_LoadButtonPosition(frame)
-    local k = UnitName("player") .. " - " .. GetRealmName(); local pos = BuffPlanerDB.buttonPos[k]
-    if pos and pos.point then frame:ClearAllPoints(); frame:SetPoint(pos.point, UIParent, pos.relativePoint or pos.point, pos.xOfs or 0, pos.yOfs or 0)
-    else frame:ClearAllPoints(); frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0) end
-    if pos and pos.show ~= nil then if pos.show then frame:Show() else frame:Hide() end else frame:Show() end
+    local settings = BuffPlaner_GetCharSettings()
+    local pos = settings.buttonPos
+
+    if pos and pos.point then
+        frame:ClearAllPoints()
+        frame:SetPoint(pos.point, UIParent, pos.relativePoint or pos.point, pos.xOfs or 0, pos.yOfs or 0)
+    else
+        frame:ClearAllPoints()
+        frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    end
 end
 
 function BuffPlaner_ToggleBuffButton()
-    local k = UnitName("player") .. " - " .. GetRealmName()
-    if not BuffPlanerDB.buttonPos[k] then BuffPlanerDB.buttonPos[k] = {} end
+    local settings = BuffPlaner_GetCharSettings()
     if BuffPlaner_DragButton:IsVisible() then
-        BuffPlanerDB.buttonPos[k].show = false
+        settings.buttonPos.show = false
     else
-        BuffPlanerDB.buttonPos[k].show = true
+        settings.buttonPos.show = true
     end
     BuffPlaner_RefreshButtonVisibility()
 end

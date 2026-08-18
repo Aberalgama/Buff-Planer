@@ -104,9 +104,7 @@ BuffPlanerDB = BuffPlanerDB or {
     selections = {},
     enabled = true,
     minimap = {},
-    buttonPos = {}, -- Stored per character: ["CharacterName - Realm"] = { point, x, y }
-    buttonSize = 60, -- Per character size setting
-    showSolo = true,
+    characters = {}, -- Stored per character: ["Name - Realm"] = { buttonPos, buttonSize, showSolo }
 }
 
 -- Merge DB with defaults on first load
@@ -116,16 +114,36 @@ function BuffPlaner_InitializeDB()
             selections = {},
             enabled = true,
             minimap = {},
-            buttonPos = {},
-            buttonSize = 60,
-            showSolo = true,
+            characters = {},
         }
     end
     if not BuffPlanerDB.selections then BuffPlanerDB.selections = {} end
     if not BuffPlanerDB.minimap then BuffPlanerDB.minimap = {} end
-    if not BuffPlanerDB.buttonPos then BuffPlanerDB.buttonPos = {} end
-    if not BuffPlanerDB.buttonSize then BuffPlanerDB.buttonSize = 60 end
-    if BuffPlanerDB.showSolo == nil then BuffPlanerDB.showSolo = true end
+    if not BuffPlanerDB.characters then BuffPlanerDB.characters = {} end
+
+    -- Migrate legacy data to character-specific storage
+    local k = UnitName("player") .. " - " .. GetRealmName()
+    if not BuffPlanerDB.characters[k] then
+        BuffPlanerDB.characters[k] = {
+            buttonPos = BuffPlanerDB.buttonPos and BuffPlanerDB.buttonPos[k] or { point = "CENTER", xOfs = 0, yOfs = 0 },
+            buttonSize = BuffPlanerDB.buttonSize or 60,
+            showSolo = (BuffPlanerDB.showSolo ~= nil) and BuffPlanerDB.showSolo or true
+        }
+    end
+end
+
+-- Helper to get current character settings
+function BuffPlaner_GetCharSettings()
+    local k = UnitName("player") .. " - " .. GetRealmName()
+    if not BuffPlanerDB.characters then BuffPlanerDB.characters = {} end
+    if not BuffPlanerDB.characters[k] then
+        BuffPlanerDB.characters[k] = {
+            buttonPos = { point = "CENTER", xOfs = 0, yOfs = 0, show = true },
+            buttonSize = 60,
+            showSolo = true
+        }
+    end
+    return BuffPlanerDB.characters[k]
 end
 
 -- Get the list of available buffs (from DB or default)
