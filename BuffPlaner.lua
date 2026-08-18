@@ -495,9 +495,14 @@ function BuffPlaner_UpdateBuffButton()
             btn:SetAttribute("unit", targetUnitToken)
             btn:SetAttribute("spell", castSpellName)
             btn.armedName, btn.armedSpell = targetName, castSpellName
+
+            -- Explicitly disable Alt+LeftClick action to prevent drag-clicks
+            btn:SetAttribute("alt-type1", "macro")
+            btn:SetAttribute("alt-macrotext1", "/run")
         else
             btn:SetAttribute("unit", nil)
             btn:SetAttribute("spell", nil)
+            btn:SetAttribute("alt-type1", nil)
             btn.armedName, btn.armedSpell = nil, nil
         end
     end
@@ -521,6 +526,8 @@ function BuffPlaner_UpdateBuffButton()
 end
 
 function BuffPlaner_OnBuffButtonClicked(self)
+    if IsAltKeyDown() then return end -- Ignore if we were likely dragging
+
     if self.armedName and self.armedSpell then
         BuffPlaner_Print("Buffing: |cff00ffff" .. self.armedName .. "|r with " .. self.armedSpell)
     else

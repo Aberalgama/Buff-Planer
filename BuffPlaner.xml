@@ -224,16 +224,27 @@
             </Layer>
         </Layers>
         <Scripts>
-            <OnMouseDown>
+            <OnLoad>
+                self:RegisterForDrag("LeftButton")
+            </OnLoad>
+            <OnDragStart>
                 if IsAltKeyDown() then
                     self:StartMoving()
+                    self.isMoving = true
                 end
-            </OnMouseDown>
-            <OnMouseUp>
+            </OnDragStart>
+            <OnDragStop>
                 self:StopMovingOrSizing()
+                self.isMoving = false
                 if BuffPlaner_SaveButtonPosition then
                     BuffPlaner_SaveButtonPosition(self)
                 end
+            </OnDragStop>
+            <OnMouseDown>
+                -- Only used to trigger potential updates, movement now handled by OnDrag
+            </OnMouseDown>
+            <OnMouseUp>
+                -- Movement now handled by OnDrag
             </OnMouseUp>
             <OnShow>
                 if BuffPlaner_LoadButtonPosition then

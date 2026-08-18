@@ -58,7 +58,7 @@ BuffPlaner_DefaultConfig = {
         { key = "kox_str_fire",    name = "STR + Fire Resi",          spellName = { "Mark of Korth'azz" }, icon = "novart_magicspell_(31)_Border", range = 40 },
         { key = "tem_stats",    name = "All Stats %",          spellName = { "Gift of Fervor" }, icon = "Templar_Buff_4", range = 40 },
         { key = "tem_agi",    name = "AGI",          spellName = { "Gift of Zeal" }, icon = "Templar_Buff_3", range = 40 },
-        { key = "ran_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Footpad's Adaptation" }, icon = "ability_rouge_thiefsbargain", range = 40 },
+        { key = "ran_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Footpad's Adaptation" }, icon = "ability_rogue_thiefsbargain", range = 40 },
         { key = "ran_ap",    name = "AP",          spellName = { "Woodsman's Adaptation" }, icon = "misc_legionfall_hunter", range = 40 },
     },
 
