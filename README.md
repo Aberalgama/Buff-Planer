@@ -36,7 +36,7 @@ This keeps Buff Planner focused on the buffs that actually require coordination,
 1. Download the addon by clicking the green **`<> Code`** button and selecting **Download ZIP**.
 2. Extract the downloaded ZIP file.
 3. Open the extracted folder.
-4. Rename `Buff-Planer-main` to `BuffPlanner`.
+4. Rename `Buff-Planner-main` to `BuffPlanner`.
 5. Copy the `BuffPlanner` folder into your `Interface/Addons` folder.
 6. Make sure the final folder structure looks like this:
 

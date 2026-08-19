@@ -1,5 +1,5 @@
 <Bindings>
     <Binding name="BUFFPLANNER_TOGGLE" category="BAGNON">
-        BuffPlaner_ToggleConfigWindow();
+        BuffPlanner_ToggleConfigWindow();
     </Binding>
 </Bindings>

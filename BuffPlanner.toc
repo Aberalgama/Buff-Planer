@@ -2,7 +2,7 @@
 ## Title: Buff Planner
 ## Notes: Buff coordination for party/raid in CoA
 ## Author: Swet
-## SavedVariables: BuffPlanerDB
+## SavedVariables: BuffPlannerDB
 
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
@@ -14,6 +14,6 @@ libs\AceLocale-3.0\AceLocale-3.0.xml
 libs\LibDataBroker-1.1.lua
 libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
-BuffPlaner_DB.lua
-BuffPlaner.xml
-BuffPlaner.lua
+BuffPlanner_DB.lua
+BuffPlanner.xml
+BuffPlanner.lua
