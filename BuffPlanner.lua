@@ -87,7 +87,7 @@ EventFrame:SetScript("OnEvent", function(self, event, ...)
 end);
 
 function BuffPlanner_Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planner]|r " .. msg);
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planner]|r " .. msg);
 end
 
 function BuffPlanner_GetPartyMembers()
