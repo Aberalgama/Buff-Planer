@@ -87,7 +87,7 @@ EventFrame:SetScript("OnEvent", function(self, event, ...)
 end);
 
 function BuffPlanner_Print(msg)
-    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planner]|r " .. msg);
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planner]|r " .. msg);
 end
 
 function BuffPlanner_GetPartyMembers()
@@ -595,6 +595,48 @@ function BuffPlanner_OnSlashCommand(msg)
         BuffPlanner_ToggleConfigWindow()
     elseif cmd == "buffbutton" then
         BuffPlanner_ToggleBuffButton()
+    --[[
+    elseif cmd == "find" and arg ~= "" then
+        -- Remove quotes if present
+        arg = arg:gsub("^%s*[\"'](.-)[\"']%s*$", "%1")
+        local searchStr = arg:lower()
+        BuffPlanner_Print("Searching for: |cff00ffff" .. arg .. "|r...")
+
+        -- 1. Check direct Spell Info (might work if in cache)
+        local sbName, _, sbIcon = GetSpellInfo(arg)
+        if sbName then
+            local iconName = sbIcon:match("([^%\\]+)$") or sbIcon
+            BuffPlanner_Print("Found! |T" .. sbIcon .. ":16|t |cff00ff00" .. sbName .. "|r -> Icon: |cff00ffff" .. iconName .. "|r")
+            return
+        end
+
+        -- 2. Deep Scan Game Database (Ascension specific needs)
+        -- Scanning 1,000,000 IDs might be slow, so we do it in batches or just increase limit
+        BuffPlanner_Print("Deep scanning database (IDs 1-1,000,000)... this may take a moment.")
+        local foundCount = 0
+        local startTime = GetTime()
+        for i = 1, 1000000 do
+            local n, _, t = GetSpellInfo(i)
+            if n then
+                local lowN = n:lower()
+                if lowN == searchStr or lowN:find(searchStr, 1, true) then
+                    local iconName = t:match("([^%\\]+)$") or t
+                    BuffPlanner_Print("Found! |T" .. t .. ":16|t |cff00ff00" .. n .. "|r -> Icon: |cff00ffff" .. iconName .. "|r (ID: " .. i .. ")")
+                    foundCount = foundCount + 1
+                    if foundCount >= 20 then
+                        BuffPlanner_Print("...showing first 20 results. Try a more specific name.")
+                        break
+                    end
+                end
+            end
+        end
+        local duration = GetTime() - startTime
+        BuffPlanner_Print(string.format("Scan finished in %.2fs. Found %d matches.", duration, foundCount))
+
+        if foundCount == 0 then
+            BuffPlanner_Print("|cffff0000Error:|r Could not find any spell matching '|cffffffff" .. arg .. "|r'.")
+        end
+    ]]
     else
         BuffPlanner_Print("Usage: /bp or /bp config, /bp buffbutton")
     end
