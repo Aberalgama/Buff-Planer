@@ -122,6 +122,17 @@ end
 -- Sync & Knowledge
 -- =============================================================================
 
+local function PlayerKnowsBuff(buff)
+    if not buff then return false end
+    local names = type(buff.spellName) == "table" and buff.spellName or { buff.spellName }
+    for _, n in ipairs(names) do
+        if GetSpellInfo(n) or GetSpellInfo("Greater " .. n) then
+            return true
+        end
+    end
+    return false
+end
+
 function BuffPlanner_RequestSync()
     local mode = GetNumRaidMembers() > 0 and "RAID" or (GetNumPartyMembers() > 0 and "PARTY" or nil)
     if mode then
@@ -152,8 +163,7 @@ function BuffPlanner_HandleSync(message, sender)
     if message == "REQ" then
         local known = ""
         for _, b in ipairs(BuffPlanner_GetBuffs()) do
-            local cast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
-            if GetSpellInfo(cast) then known = known .. b.key .. "," end
+            if PlayerKnowsBuff(b) then known = known .. b.key .. "," end
         end
         if known ~= "" then SendAddonMessage(SYNC_PREFIX, "DATA:" .. known, mode) end
         BuffPlanner_BroadcastWishes()
@@ -274,7 +284,7 @@ function BuffPlanner_OnConfigShow()
                 local castName = type(buff.spellName) == "table" and buff.spellName[1] or buff.spellName
 
                 local hasAddon = (unit == "player") or BuffPlanner.HasAddon[playerName]
-                local knows = (unit == "player") and GetSpellInfo(castName) or (BuffPlanner.RemoteKnownBuffs[playerName] and BuffPlanner.RemoteKnownBuffs[playerName][buff.key])
+                local knows = (unit == "player") and PlayerKnowsBuff(buff) or (BuffPlanner.RemoteKnownBuffs[playerName] and BuffPlanner.RemoteKnownBuffs[playerName][buff.key])
 
                 local btn = CreateFrame("Button", nil, rowFrame)
                 btn:SetSize(34, 34);
@@ -346,7 +356,11 @@ local function UnitHasBuff(unit, spellInput)
     for i = 1, 40 do
         local name, _, _, _, _, _, expires = UnitBuff(unit, i)
         if not name then break end
-        for _, searchName in ipairs(searchList) do if name == searchName then return true, expires end end
+        for _, searchName in ipairs(searchList) do
+            if name == searchName or name == "Greater " .. searchName then
+                return true, expires
+            end
+        end
     end
     return false, 0
 end
