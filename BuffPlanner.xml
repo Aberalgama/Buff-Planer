@@ -1,6 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
     <!-- Main Configuration Frame -->
-    <Frame name="BuffPlaner_ConfigFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" frameStrata="DIALOG">
+    <Frame name="BuffPlanner_ConfigFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" frameStrata="DIALOG">
         <Size x="600" y="500"/>
         <Anchors>
             <Anchor point="CENTER"/>
@@ -26,7 +26,7 @@
                                 <Anchor point="TOP"/>
                             </Anchors>
                         </Texture>
-                        <FontString name="BuffPlaner_ConfigFrameTitle" inherits="GameFontNormal" text="Buff Planer">
+                        <FontString name="BuffPlanner_ConfigFrameTitle" inherits="GameFontNormal" text="Buff Planner">
                             <Anchors>
                                 <Anchor point="TOP" relativeTo="$parentTexture">
                                     <Offset x="0" y="-14"/>
@@ -49,11 +49,11 @@
                 </Scripts>
             </Button>
 
-            <!-- ================= PAGE 1: PLANER ================= -->
-            <Frame name="BuffPlaner_PlanerPage" setAllPoints="true">
+            <!-- ================= PAGE 1: PLANNER ================= -->
+            <Frame name="BuffPlanner_PlannerPage" setAllPoints="true">
                 <Layers>
                     <Layer level="ARTWORK">
-                        <FontString name="BuffPlaner_ConfigFrameInfoText" inherits="GameFontHighlight" text="Select Buffs that you would like to have:">
+                        <FontString name="BuffPlanner_ConfigFrameInfoText" inherits="GameFontHighlight" text="Select Buffs that you would like to have:">
                             <Size x="550" y="20"/>
                             <Anchors>
                                 <Anchor point="TOP" x="0" y="-45"/>
@@ -62,7 +62,7 @@
                     </Layer>
                 </Layers>
                 <Frames>
-                    <Frame name="BuffPlaner_ConfigFrameScrollContainer">
+                    <Frame name="BuffPlanner_ConfigFrameScrollContainer">
                         <Size x="560" y="395"/>
                         <Anchors>
                             <Anchor point="TOP" x="0" y="-75"/>
@@ -72,13 +72,13 @@
                             <EdgeSize val="16"/>
                         </Backdrop>
                         <Frames>
-                            <ScrollFrame name="BuffPlaner_ConfigFrameScrollFrame" inherits="UIPanelScrollFrameTemplate">
+                            <ScrollFrame name="BuffPlanner_ConfigFrameScrollFrame" inherits="UIPanelScrollFrameTemplate">
                                 <Anchors>
                                     <Anchor point="TOPLEFT" x="6" y="-6"/>
                                     <Anchor point="BOTTOMRIGHT" x="-26" y="6"/>
                                 </Anchors>
                                 <ScrollChild>
-                                    <Frame name="BuffPlaner_ConfigFrameScrollChild">
+                                    <Frame name="BuffPlanner_ConfigFrameScrollChild">
                                         <Size x="520" y="340"/>
                                     </Frame>
                                 </ScrollChild>
@@ -89,10 +89,10 @@
             </Frame>
 
             <!-- ================= PAGE 2: SETTINGS ================= -->
-            <Frame name="BuffPlaner_SettingsPage" setAllPoints="true" hidden="true">
+            <Frame name="BuffPlanner_SettingsPage" setAllPoints="true" hidden="true">
                 <Frames>
                     <!-- Button Size Setting Row -->
-                    <Frame name="BuffPlaner_SettingsButtonSizeRow">
+                    <Frame name="BuffPlanner_SettingsButtonSizeRow">
                         <Size x="560" y="40"/>
                         <Anchors>
                             <Anchor point="TOPLEFT" x="20" y="-60"/>
@@ -107,7 +107,7 @@
                             </Layer>
                         </Layers>
                         <Frames>
-                            <Slider name="BuffPlaner_SettingsButtonSizeSlider" inherits="OptionsSliderTemplate">
+                            <Slider name="BuffPlanner_SettingsButtonSizeSlider" inherits="OptionsSliderTemplate">
                                 <Size x="200" y="16"/>
                                 <Anchors>
                                     <Anchor point="LEFT" relativeTo="$parentLabel" relativePoint="RIGHT" x="20" y="-2"/>
@@ -121,8 +121,8 @@
                                         self:SetValueStep(1)
                                     </OnLoad>
                                     <OnValueChanged>
-                                        if BuffPlaner_OnButtonSizeChanged then
-                                            BuffPlaner_OnButtonSizeChanged(value)
+                                        if BuffPlanner_OnButtonSizeChanged then
+                                            BuffPlanner_OnButtonSizeChanged(value)
                                         end
                                     </OnValueChanged>
                                 </Scripts>
@@ -131,10 +131,10 @@
                     </Frame>
 
                     <!-- Show Solo Setting Row -->
-                    <Frame name="BuffPlaner_SettingsShowSoloRow">
+                    <Frame name="BuffPlanner_SettingsShowSoloRow">
                         <Size x="560" y="40"/>
                         <Anchors>
-                            <Anchor point="TOPLEFT" relativeTo="BuffPlaner_SettingsButtonSizeRow" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
+                            <Anchor point="TOPLEFT" relativeTo="BuffPlanner_SettingsButtonSizeRow" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
                         </Anchors>
                         <Layers>
                             <Layer level="ARTWORK">
@@ -146,14 +146,14 @@
                             </Layer>
                         </Layers>
                         <Frames>
-                            <CheckButton name="BuffPlaner_SettingsShowSoloCheckbox">
+                            <CheckButton name="BuffPlanner_SettingsShowSoloCheckbox">
                                 <Size x="26" y="26"/>
                                 <Anchors>
                                     <Anchor point="LEFT" relativeTo="$parentLabel" relativePoint="RIGHT" x="10" y="0"/>
                                 </Anchors>
                                 <Scripts>
                                     <OnClick>
-                                        BuffPlaner_OnShowSoloChanged(self:GetChecked())
+                                        BuffPlanner_OnShowSoloChanged(self:GetChecked())
                                     </OnClick>
                                 </Scripts>
                                 <NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
@@ -168,13 +168,13 @@
             </Frame>
 
             <!-- ================= TABS ================= -->
-            <Button name="$parentTab1" inherits="CharacterFrameTabButtonTemplate" id="1" text="Planer">
+            <Button name="$parentTab1" inherits="CharacterFrameTabButtonTemplate" id="1" text="Planner">
                 <Anchors>
                     <Anchor point="CENTER" relativePoint="BOTTOMLEFT" x="60" y="-12"/>
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        BuffPlaner_SetTab(self:GetID())
+                        BuffPlanner_SetTab(self:GetID())
                     </OnClick>
                 </Scripts>
             </Button>
@@ -184,7 +184,7 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        BuffPlaner_SetTab(self:GetID())
+                        BuffPlanner_SetTab(self:GetID())
                     </OnClick>
                 </Scripts>
             </Button>
@@ -192,8 +192,8 @@
 
         <Scripts>
             <OnShow>
-                BuffPlaner_SetTab(1) -- Default to Planer tab
-                if BuffPlaner_OnConfigShow then BuffPlaner_OnConfigShow() end
+                BuffPlanner_SetTab(1) -- Default to Planner tab
+                if BuffPlanner_OnConfigShow then BuffPlanner_OnConfigShow() end
             </OnShow>
             <OnMouseDown>
                 self:StartMoving()
@@ -205,7 +205,7 @@
     </Frame>
 
     <!-- Draggable Buff Button -->
-    <Button name="BuffPlaner_DragButton" inherits="SecureActionButtonTemplate" movable="true" parent="UIParent" toplevel="true" frameStrata="MEDIUM" clampedToScreen="true">
+    <Button name="BuffPlanner_DragButton" inherits="SecureActionButtonTemplate" movable="true" parent="UIParent" toplevel="true" frameStrata="MEDIUM" clampedToScreen="true">
         <Size x="60" y="60"/>
         <Anchors>
             <Anchor point="CENTER"/>
@@ -236,8 +236,8 @@
             <OnDragStop>
                 self:StopMovingOrSizing()
                 self.isMoving = false
-                if BuffPlaner_SaveButtonPosition then
-                    BuffPlaner_SaveButtonPosition(self)
+                if BuffPlanner_SaveButtonPosition then
+                    BuffPlanner_SaveButtonPosition(self)
                 end
             </OnDragStop>
             <OnMouseDown>
@@ -247,15 +247,15 @@
                 -- Movement now handled by OnDrag
             </OnMouseUp>
             <OnShow>
-                if BuffPlaner_LoadButtonPosition then
-                    BuffPlaner_LoadButtonPosition(self)
+                if BuffPlanner_LoadButtonPosition then
+                    BuffPlanner_LoadButtonPosition(self)
                 end
-                if BuffPlaner_UpdateBuffButton then
-                    BuffPlaner_UpdateBuffButton()
+                if BuffPlanner_UpdateBuffButton then
+                    BuffPlanner_UpdateBuffButton()
                 end
             </OnShow>
             <PreClick>
-                if BuffPlaner_OnBuffButtonClicked then BuffPlaner_OnBuffButtonClicked(self) end
+                if BuffPlanner_OnBuffButtonClicked then BuffPlanner_OnBuffButtonClicked(self) end
             </PreClick>
         </Scripts>
     </Button>

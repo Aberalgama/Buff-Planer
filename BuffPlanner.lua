@@ -1,16 +1,16 @@
 -- =============================================================================
--- BuffPlaner.lua
--- Haupt-Code für das Buff Planer Addon.
+-- BuffPlanner.lua
+-- Haupt-Code für das Buff Planner Addon.
 -- =============================================================================
 
-BuffPlaner = LibStub('AceAddon-3.0'):NewAddon('BuffPlaner', 'AceEvent-3.0', 'AceConsole-3.0')
+BuffPlanner = LibStub('AceAddon-3.0'):NewAddon('BuffPlanner', 'AceEvent-3.0', 'AceConsole-3.0')
 
 -- Runtime data
-BuffPlaner.RemoteKnownBuffs = {}
-BuffPlaner.WishesFromOthers = {} -- [CleanName] = buffKey
-BuffPlaner.HasAddon = {} -- [CleanName] = true
+BuffPlanner.RemoteKnownBuffs = {}
+BuffPlanner.WishesFromOthers = {} -- [CleanName] = buffKey
+BuffPlanner.HasAddon = {} -- [CleanName] = true
 local SYNC_PREFIX = "BP_SYNC"
-BuffPlaner_PlayerRows = {};
+BuffPlanner_PlayerRows = {};
 
 local LDB = LibStub("LibDataBroker-1.1", true)
 local LDBIcon = LibStub("LibDBIcon-1.0", true)
@@ -23,44 +23,44 @@ local function GetCleanName(name)
 end
 
 local function createLDBLauncher()
-    local LDBObj = LibStub("LibDataBroker-1.1"):NewDataObject("BuffPlaner", {
+    local LDBObj = LibStub("LibDataBroker-1.1"):NewDataObject("BuffPlanner", {
         type = "launcher",
-        label = "Buff Planer",
-        OnClick = function() BuffPlaner_ToggleConfigWindow() end,
+        label = "Buff Planner",
+        OnClick = function() BuffPlanner_ToggleConfigWindow() end,
         icon = "Interface\\Icons\\spell_arcane_arcaneresilience",
         OnTooltipShow = function(tooltip)
             if not tooltip or not tooltip.AddLine then return end
-            tooltip:AddLine("Buff Planer")
-            tooltip:AddLine("|cffffff00Left click to open Buff Planer.")
+            tooltip:AddLine("Buff Planner")
+            tooltip:AddLine("|cffffff00Left click to open Buff Planner.")
             tooltip:AddLine("|cffffff00Alt + Left click & drag to move BUFF button.")
         end,
     })
-    if LDBIcon then LDBIcon:Register("BuffPlaner", LDBObj, BuffPlanerDB.minimap) end
+    if LDBIcon then LDBIcon:Register("BuffPlanner", LDBObj, BuffPlannerDB.minimap) end
 end
 
-function BuffPlaner_OnLoad(self)
-    BuffPlaner_InitializeDB();
+function BuffPlanner_OnLoad(self)
+    BuffPlanner_InitializeDB();
     if LDB then createLDBLauncher() end
 
-    if BuffPlaner_DragButton then
+    if BuffPlanner_DragButton then
         -- Clear all legacy attributes to prevent accidental self-buffing
-        BuffPlaner_DragButton:SetAttribute("type", "macro")
-        BuffPlaner_DragButton:SetAttribute("unit", nil)
-        BuffPlaner_DragButton:SetAttribute("spell", nil)
+        BuffPlanner_DragButton:SetAttribute("type", "macro")
+        BuffPlanner_DragButton:SetAttribute("unit", nil)
+        BuffPlanner_DragButton:SetAttribute("spell", nil)
 
         -- Apply character-specific settings
-        local settings = BuffPlaner_GetCharSettings()
-        BuffPlaner_ApplyButtonSize(settings.buttonSize)
-        BuffPlaner_RefreshButtonVisibility()
+        local settings = BuffPlanner_GetCharSettings()
+        BuffPlanner_ApplyButtonSize(settings.buttonSize)
+        BuffPlanner_RefreshButtonVisibility()
     end
 
-    BuffPlaner_Print("Buff Planer geladen. /buffplaner zum Öffnen.");
-    SLASH_BUFFPLANNER1, SLASH_BUFFPLANNER2 = "/buffplaner", "/bp";
-    SlashCmdList["BUFFPLANNER"] = BuffPlaner_OnSlashCommand;
-    table.insert(UISpecialFrames, "BuffPlaner_ConfigFrame");
+    -- BuffPlanner_Print("Buff Planner geladen. /buffplanner zum Öffnen.");
+    SLASH_BUFFPLANNER1, SLASH_BUFFPLANNER2, SLASH_BUFFPLANNER3 = "/buffplanner", "/bp", "/buffplanner";
+    SlashCmdList["BUFFPLANNER"] = BuffPlanner_OnSlashCommand;
+    table.insert(UISpecialFrames, "BuffPlanner_ConfigFrame");
 end
 
-local EventFrame = CreateFrame("Frame", "BuffPlaner_EventFrame", UIParent);
+local EventFrame = CreateFrame("Frame", "BuffPlanner_EventFrame", UIParent);
 EventFrame:RegisterEvent("ADDON_LOADED");
 EventFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 EventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
@@ -69,28 +69,28 @@ EventFrame:RegisterEvent("PLAYER_TARGET_CHANGED") -- Update instantly when targe
 
 EventFrame:SetScript("OnEvent", function(self, event, ...)
     local arg1, arg2, _, arg4 = ...
-    if event == "ADDON_LOADED" and arg1 == "BuffPlaner" then BuffPlaner_OnLoad(self)
+    if event == "ADDON_LOADED" and arg1 == "BuffPlanner" then BuffPlanner_OnLoad(self)
     elseif event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_TARGET_CHANGED" then
-        if BuffPlaner_DragButton then
-            if event == "PLAYER_ENTERING_WORLD" then BuffPlaner_LoadButtonPosition(BuffPlaner_DragButton) end
-            BuffPlaner_RefreshButtonVisibility()
-            BuffPlaner_UpdateBuffButton()
+        if BuffPlanner_DragButton then
+            if event == "PLAYER_ENTERING_WORLD" then BuffPlanner_LoadButtonPosition(BuffPlanner_DragButton) end
+            BuffPlanner_RefreshButtonVisibility()
+            BuffPlanner_UpdateBuffButton()
         end
-        if event == "PLAYER_ENTERING_WORLD" then BuffPlaner_RequestSync() end
+        if event == "PLAYER_ENTERING_WORLD" then BuffPlanner_RequestSync() end
     elseif event == "PARTY_MEMBERS_CHANGED" then
-        BuffPlaner_RefreshButtonVisibility()
-        BuffPlaner_RequestSync()
-        if BuffPlaner_ConfigFrame and BuffPlaner_ConfigFrame:IsVisible() then BuffPlaner_OnConfigShow() end
+        BuffPlanner_RefreshButtonVisibility()
+        BuffPlanner_RequestSync()
+        if BuffPlanner_ConfigFrame and BuffPlanner_ConfigFrame:IsVisible() then BuffPlanner_OnConfigShow() end
     elseif event == "CHAT_MSG_ADDON" and arg1 == SYNC_PREFIX then
-        BuffPlaner_HandleSync(arg2, arg4)
+        BuffPlanner_HandleSync(arg2, arg4)
     end
 end);
 
-function BuffPlaner_Print(msg)
-    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planer]|r " .. msg);
+function BuffPlanner_Print(msg)
+    -- DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[Buff Planner]|r " .. msg);
 end
 
-function BuffPlaner_GetPartyMembers()
+function BuffPlanner_GetPartyMembers()
     local members = {};
     local myName = GetCleanName(UnitName("player"))
 
@@ -122,52 +122,52 @@ end
 -- Sync & Knowledge
 -- =============================================================================
 
-function BuffPlaner_RequestSync()
+function BuffPlanner_RequestSync()
     local mode = GetNumRaidMembers() > 0 and "RAID" or (GetNumPartyMembers() > 0 and "PARTY" or nil)
     if mode then
         SendAddonMessage(SYNC_PREFIX, "REQ", mode)
-        BuffPlaner_BroadcastWishes()
+        BuffPlanner_BroadcastWishes()
     end
 end
 
-function BuffPlaner_BroadcastWishes()
+function BuffPlanner_BroadcastWishes()
     local mode = GetNumRaidMembers() > 0 and "RAID" or (GetNumPartyMembers() > 0 and "PARTY" or nil)
     if not mode then return end
     local wishStr = ""
-    for provider, key in pairs(BuffPlanerDB.selections) do
+    for provider, key in pairs(BuffPlannerDB.selections) do
         wishStr = wishStr .. provider .. ":" .. key .. ";"
     end
     if wishStr ~= "" then SendAddonMessage(SYNC_PREFIX, "WISH:" .. wishStr, mode) end
 end
 
-function BuffPlaner_HandleSync(message, sender)
+function BuffPlanner_HandleSync(message, sender)
     local cleanSender = GetCleanName(sender)
     if cleanSender == GetCleanName(UnitName("player")) then return end
 
     -- Anyone who sends a message has the addon
-    BuffPlaner.HasAddon[cleanSender] = true
+    BuffPlanner.HasAddon[cleanSender] = true
 
     local mode = GetNumRaidMembers() > 0 and "RAID" or "PARTY"
 
     if message == "REQ" then
         local known = ""
-        for _, b in ipairs(BuffPlaner_GetBuffs()) do
+        for _, b in ipairs(BuffPlanner_GetBuffs()) do
             local cast = type(b.spellName) == "table" and b.spellName[1] or b.spellName
             if GetSpellInfo(cast) then known = known .. b.key .. "," end
         end
         if known ~= "" then SendAddonMessage(SYNC_PREFIX, "DATA:" .. known, mode) end
-        BuffPlaner_BroadcastWishes()
+        BuffPlanner_BroadcastWishes()
     elseif message:find("^DATA:") then
         local keys = {}
         for k in message:sub(6):gmatch("([^,]+)") do keys[k] = true end
-        BuffPlaner.RemoteKnownBuffs[cleanSender] = keys
-        if BuffPlaner_ConfigFrame and BuffPlaner_ConfigFrame:IsVisible() then BuffPlaner_OnConfigShow() end
+        BuffPlanner.RemoteKnownBuffs[cleanSender] = keys
+        if BuffPlanner_ConfigFrame and BuffPlanner_ConfigFrame:IsVisible() then BuffPlanner_OnConfigShow() end
     elseif message:find("^WISH:") then
         local myName = GetCleanName(UnitName("player"))
         for entry in message:sub(6):gmatch("([^;]+)") do
             local provider, key = entry:match("([^:]+):([^:]+)")
             if provider and GetCleanName(provider) == myName then
-                BuffPlaner.WishesFromOthers[cleanSender] = key
+                BuffPlanner.WishesFromOthers[cleanSender] = key
             end
         end
     end
@@ -177,55 +177,55 @@ end
 -- Config UI
 -- =============================================================================
 
-function BuffPlaner_SetTab(id)
-    local frame = BuffPlaner_ConfigFrame
+function BuffPlanner_SetTab(id)
+    local frame = BuffPlanner_ConfigFrame
     frame.numTabs = 2
     PanelTemplates_SetTab(frame, id)
 
     if id == 1 then
-        BuffPlaner_PlanerPage:Show()
-        BuffPlaner_SettingsPage:Hide()
-        BuffPlaner_OnConfigShow()
+        BuffPlanner_PlannerPage:Show()
+        BuffPlanner_SettingsPage:Hide()
+        BuffPlanner_OnConfigShow()
     else
-        BuffPlaner_PlanerPage:Hide()
-        BuffPlaner_SettingsPage:Show()
+        BuffPlanner_PlannerPage:Hide()
+        BuffPlanner_SettingsPage:Show()
 
-        local settings = BuffPlaner_GetCharSettings()
-        if BuffPlaner_SettingsButtonSizeSlider then
-            BuffPlaner_SettingsButtonSizeSlider:SetValue(settings.buttonSize)
+        local settings = BuffPlanner_GetCharSettings()
+        if BuffPlanner_SettingsButtonSizeSlider then
+            BuffPlanner_SettingsButtonSizeSlider:SetValue(settings.buttonSize)
         end
-        if BuffPlaner_SettingsShowSoloCheckbox then
-            BuffPlaner_SettingsShowSoloCheckbox:SetChecked(settings.showSolo and 1 or nil)
+        if BuffPlanner_SettingsShowSoloCheckbox then
+            BuffPlanner_SettingsShowSoloCheckbox:SetChecked(settings.showSolo and 1 or nil)
         end
     end
 end
 
-function BuffPlaner_ToggleConfigWindow()
-    if BuffPlaner_ConfigFrame:IsVisible() then
-        BuffPlaner_ConfigFrame:Hide()
+function BuffPlanner_ToggleConfigWindow()
+    if BuffPlanner_ConfigFrame:IsVisible() then
+        BuffPlanner_ConfigFrame:Hide()
     else
-        BuffPlaner_RequestSync()
-        BuffPlaner_ConfigFrame:Show()
+        BuffPlanner_RequestSync()
+        BuffPlanner_ConfigFrame:Show()
     end
 end
 
-function BuffPlaner_OnConfigShow()
+function BuffPlanner_OnConfigShow()
     -- Initialize Tab System for the frame
-    BuffPlaner_ConfigFrame.numTabs = 2
-    PanelTemplates_UpdateTabs(BuffPlaner_ConfigFrame)
+    BuffPlanner_ConfigFrame.numTabs = 2
+    PanelTemplates_UpdateTabs(BuffPlanner_ConfigFrame)
 
-    if not BuffPlaner_PlanerPage:IsVisible() then return end
-    BuffPlaner_ConfigFrameTitle:SetText("Buff Planer");
+    if not BuffPlanner_PlannerPage:IsVisible() then return end
+    BuffPlanner_ConfigFrameTitle:SetText("Buff Planner");
 
     local _, myToken = UnitClass("player")
     -- Use standard print for debug to ensure it's seen
-    -- print("|cff00ff00[Buff Planer]|r DEBUG: Your Class Token is: |cff00ffff" .. (myToken or "NIL") .. "|r")
+    -- print("|cff00ff00[Buff Planner]|r DEBUG: Your Class Token is: |cff00ffff" .. (myToken or "NIL") .. "|r")
 
-    if not BuffPlaner_PlayerRows then BuffPlaner_PlayerRows = {} end
-    for i, row in ipairs(BuffPlaner_PlayerRows) do row:Hide(); BuffPlaner_PlayerRows[i] = nil end
+    if not BuffPlanner_PlayerRows then BuffPlanner_PlayerRows = {} end
+    for i, row in ipairs(BuffPlanner_PlayerRows) do row:Hide(); BuffPlanner_PlayerRows[i] = nil end
 
-    local members, buffs = BuffPlaner_GetPartyMembers(), BuffPlaner_GetBuffs()
-    local classBuffMap, scrollChild = BuffPlaner_DefaultConfig.classBuffs, BuffPlaner_ConfigFrameScrollChild
+    local members, buffs = BuffPlanner_GetPartyMembers(), BuffPlanner_GetBuffs()
+    local classBuffMap, scrollChild = BuffPlanner_DefaultConfig.classBuffs, BuffPlanner_ConfigFrameScrollChild
 
     local startY = 2 -- Initial padding from top
     local rowPadding = 4 -- Padding between rows
@@ -263,7 +263,7 @@ function BuffPlaner_OnConfigShow()
         nameText:SetJustifyH("LEFT"); nameText:SetJustifyV("MIDDLE")
         nameText:SetText(playerName); nameText:SetTextColor(classColor.r, classColor.g, classColor.b)
 
-        local selectedKey, renderIdx = BuffPlanerDB.selections[playerName], 1
+        local selectedKey, renderIdx = BuffPlannerDB.selections[playerName], 1
         local rowHeight = 46 -- Compact fixed height without labels
         rowFrame:SetHeight(rowHeight)
 
@@ -273,8 +273,8 @@ function BuffPlaner_OnConfigShow()
             if buff then
                 local castName = type(buff.spellName) == "table" and buff.spellName[1] or buff.spellName
 
-                local hasAddon = (unit == "player") or BuffPlaner.HasAddon[playerName]
-                local knows = (unit == "player") and GetSpellInfo(castName) or (BuffPlaner.RemoteKnownBuffs[playerName] and BuffPlaner.RemoteKnownBuffs[playerName][buff.key])
+                local hasAddon = (unit == "player") or BuffPlanner.HasAddon[playerName]
+                local knows = (unit == "player") and GetSpellInfo(castName) or (BuffPlanner.RemoteKnownBuffs[playerName] and BuffPlanner.RemoteKnownBuffs[playerName][buff.key])
 
                 local btn = CreateFrame("Button", nil, rowFrame)
                 btn:SetSize(34, 34);
@@ -305,10 +305,10 @@ function BuffPlaner_OnConfigShow()
                 if hasAddon and knows then
                     btn.buffKey, btn.playerName = buff.key, playerName
                     btn:SetScript("OnClick", function(s)
-                        local cur = BuffPlanerDB.selections[s.playerName]
-                        if cur == s.buffKey then BuffPlanerDB.selections[s.playerName] = nil else BuffPlanerDB.selections[s.playerName] = s.buffKey end
-                        BuffPlaner_BroadcastWishes()
-                        BuffPlaner_OnConfigShow()
+                        local cur = BuffPlannerDB.selections[s.playerName]
+                        if cur == s.buffKey then BuffPlannerDB.selections[s.playerName] = nil else BuffPlannerDB.selections[s.playerName] = s.buffKey end
+                        BuffPlanner_BroadcastWishes()
+                        BuffPlanner_OnConfigShow()
                     end)
                 end
 
@@ -330,7 +330,7 @@ function BuffPlaner_OnConfigShow()
             end
         end
 
-        BuffPlaner_PlayerRows[#BuffPlaner_PlayerRows+1] = rowFrame
+        BuffPlanner_PlayerRows[#BuffPlanner_PlayerRows+1] = rowFrame
         startY = startY + rowHeight + rowPadding
     end
     scrollChild:SetHeight(startY + 10)
@@ -364,33 +364,33 @@ local function UnitIsInRange(unit, buff)
     return CheckInteractDistance(unit, 4)
 end
 
-function BuffPlaner_ApplyButtonSize(size)
-    if not BuffPlaner_DragButton then return end
-    BuffPlaner_DragButton:SetSize(size, size)
+function BuffPlanner_ApplyButtonSize(size)
+    if not BuffPlanner_DragButton then return end
+    BuffPlanner_DragButton:SetSize(size, size)
 
-    local settings = BuffPlaner_GetCharSettings()
+    local settings = BuffPlanner_GetCharSettings()
     settings.buttonSize = size
 
-    BuffPlaner_UpdateBuffButton() -- Refresh text scaling
+    BuffPlanner_UpdateBuffButton() -- Refresh text scaling
 end
 
-function BuffPlaner_OnButtonSizeChanged(value)
-    BuffPlaner_ApplyButtonSize(value)
+function BuffPlanner_OnButtonSizeChanged(value)
+    BuffPlanner_ApplyButtonSize(value)
 end
 
-function BuffPlaner_OnShowSoloChanged(value)
-    local settings = BuffPlaner_GetCharSettings()
+function BuffPlanner_OnShowSoloChanged(value)
+    local settings = BuffPlanner_GetCharSettings()
     settings.showSolo = (value == 1 or value == true)
-    BuffPlaner_RefreshButtonVisibility()
+    BuffPlanner_RefreshButtonVisibility()
 end
 
-function BuffPlaner_RefreshButtonVisibility()
-    local btn = BuffPlaner_DragButton
+function BuffPlanner_RefreshButtonVisibility()
+    local btn = BuffPlanner_DragButton
     if not btn then return end
 
     local inGroup = (UnitExists("party1") or UnitExists("raid1") or GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0)
 
-    local settings = BuffPlaner_GetCharSettings()
+    local settings = BuffPlanner_GetCharSettings()
     local userShow = (settings.buttonPos.show ~= false)
 
     if userShow and (inGroup or settings.showSolo) then
@@ -400,22 +400,22 @@ function BuffPlaner_RefreshButtonVisibility()
     end
 end
 
-function BuffPlaner_UpdateBuffButton()
-    local text, btn = BuffPlaner_DragButtonText, BuffPlaner_DragButton
+function BuffPlanner_UpdateBuffButton()
+    local text, btn = BuffPlanner_DragButtonText, BuffPlanner_DragButton
     if not text or not btn then return end
 
-    local settings = BuffPlaner_GetCharSettings()
+    local settings = BuffPlanner_GetCharSettings()
     local size = settings.buttonSize or 60
     local font, _, flags = text:GetFont()
 
-    local members = BuffPlaner_GetPartyMembers()
+    local members = BuffPlanner_GetPartyMembers()
     local someoneNeedsBuff, minExp, any = false, 999999, false
     local myName = GetCleanName(UnitName("player"))
     local targetUnitToken, targetName, castSpellName = nil, nil, nil
 
     local recipients = {}
-    for name, key in pairs(BuffPlaner.WishesFromOthers) do recipients[name] = key end
-    if BuffPlanerDB.selections[myName] then recipients[myName] = BuffPlanerDB.selections[myName] end
+    for name, key in pairs(BuffPlanner.WishesFromOthers) do recipients[name] = key end
+    if BuffPlannerDB.selections[myName] then recipients[myName] = BuffPlannerDB.selections[myName] end
 
     -- Pass 1: URGENT PASS - Find someone who is MISSING a buff
     -- Priority 1.1: Current Target
@@ -423,7 +423,7 @@ function BuffPlaner_UpdateBuffButton()
         local tName = GetCleanName(UnitName("target"))
         local desiredKey = recipients[tName]
         if desiredKey then
-            local b = BuffPlaner_GetBuffByKey(desiredKey)
+            local b = BuffPlanner_GetBuffByKey(desiredKey)
             if b and UnitIsInRange("target", b) then
                 local has = UnitHasBuff("target", b.spellName)
                 if not has then
@@ -439,7 +439,7 @@ function BuffPlaner_UpdateBuffButton()
             local recipientName, unit = info.name, info.unit
             local desiredKey = recipients[recipientName]
             if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
-                local b = BuffPlaner_GetBuffByKey(desiredKey)
+                local b = BuffPlanner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange(unit, b) then
                     local has, exp = UnitHasBuff(unit, b.spellName)
                     if not has then
@@ -458,7 +458,7 @@ function BuffPlaner_UpdateBuffButton()
             local tName = GetCleanName(UnitName("target"))
             local desiredKey = recipients[tName]
             if desiredKey then
-                local b = BuffPlaner_GetBuffByKey(desiredKey)
+                local b = BuffPlanner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange("target", b) then
                     local has, exp = UnitHasBuff("target", b.spellName)
                     if has and exp and exp > 0 then
@@ -474,7 +474,7 @@ function BuffPlaner_UpdateBuffButton()
             local recipientName, unit = info.name, info.unit
             local desiredKey = recipients[recipientName]
             if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
-                local b = BuffPlaner_GetBuffByKey(desiredKey)
+                local b = BuffPlanner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange(unit, b) then
                     local has, exp = UnitHasBuff(unit, b.spellName)
                     if has and exp and exp > 0 then
@@ -527,14 +527,14 @@ function BuffPlaner_UpdateBuffButton()
     end
 end
 
-function BuffPlaner_OnBuffButtonClicked(self)
+function BuffPlanner_OnBuffButtonClicked(self)
     if IsAltKeyDown() then return end -- Ignore if we were likely dragging
 
     if self.armedName and self.armedSpell then
-        BuffPlaner_Print("Buffing: |cff00ffff" .. self.armedName .. "|r with " .. self.armedSpell)
+        BuffPlanner_Print("Buffing: |cff00ffff" .. self.armedName .. "|r with " .. self.armedSpell)
     else
         -- If no buff is selected or armed, open the config window
-        BuffPlaner_ToggleConfigWindow()
+        BuffPlanner_ToggleConfigWindow()
     end
 end
 
@@ -542,9 +542,9 @@ end
 -- Button Persistence
 -- =============================================================================
 
-function BuffPlaner_SaveButtonPosition(frame)
+function BuffPlanner_SaveButtonPosition(frame)
     local p, _, rp, x, y = frame:GetPoint()
-    local settings = BuffPlaner_GetCharSettings()
+    local settings = BuffPlanner_GetCharSettings()
 
     settings.buttonPos.point = p
     settings.buttonPos.relativePoint = rp
@@ -552,8 +552,8 @@ function BuffPlaner_SaveButtonPosition(frame)
     settings.buttonPos.yOfs = y
 end
 
-function BuffPlaner_LoadButtonPosition(frame)
-    local settings = BuffPlaner_GetCharSettings()
+function BuffPlanner_LoadButtonPosition(frame)
+    local settings = BuffPlanner_GetCharSettings()
     local pos = settings.buttonPos
 
     if pos and pos.point then
@@ -565,14 +565,14 @@ function BuffPlaner_LoadButtonPosition(frame)
     end
 end
 
-function BuffPlaner_ToggleBuffButton()
-    local settings = BuffPlaner_GetCharSettings()
-    if BuffPlaner_DragButton:IsVisible() then
+function BuffPlanner_ToggleBuffButton()
+    local settings = BuffPlanner_GetCharSettings()
+    if BuffPlanner_DragButton:IsVisible() then
         settings.buttonPos.show = false
     else
         settings.buttonPos.show = true
     end
-    BuffPlaner_RefreshButtonVisibility()
+    BuffPlanner_RefreshButtonVisibility()
 end
 
 local updateTimer = 0;
@@ -580,108 +580,22 @@ EventFrame:SetScript("OnUpdate", function(self, elapsed)
     updateTimer = updateTimer + elapsed;
     if updateTimer >= 1 then
         updateTimer = 0;
-        BuffPlaner_RefreshButtonVisibility()
-        if BuffPlaner_DragButton and BuffPlaner_DragButton:IsVisible() then
-            BuffPlaner_UpdateBuffButton()
+        BuffPlanner_RefreshButtonVisibility()
+        if BuffPlanner_DragButton and BuffPlanner_DragButton:IsVisible() then
+            BuffPlanner_UpdateBuffButton()
         end
     end
 end);
 
-function BuffPlaner_OnSlashCommand(msg)
+function BuffPlanner_OnSlashCommand(msg)
     local cmd, arg = msg:match("^(%S*)%s*(.*)$")
     cmd = cmd:lower()
 
     if cmd == "" or cmd == "config" then
-        BuffPlaner_ToggleConfigWindow()
+        BuffPlanner_ToggleConfigWindow()
     elseif cmd == "buffbutton" then
-        BuffPlaner_ToggleBuffButton()
-    --[[
-    elseif cmd == "find" and arg ~= "" then
-        local searchStr = arg:lower()
-        BuffPlaner_Print("Deep Scan for: |cff00ffff" .. searchStr .. "|r (Limit: 1.000.000)...")
-
-        -- 1. Check Spellbook first
-        local sbName, _, sbIcon = GetSpellInfo(arg)
-        if sbName then
-            local iconName = sbIcon:match("([^%\\]+)$") or sbIcon
-            BuffPlaner_Print("Found in Spellbook! |T" .. sbIcon .. ":16|t |cff00ff00" .. sbName .. "|r -> Icon: |cff00ffff" .. iconName .. "|r")
-            return
-        end
-
-        -- 2. Deep Scan Game Database
-        local foundCount = 0
-        for i = 1, 1000000 do
-            local n, _, t = GetSpellInfo(i)
-            if n then
-                local lowN = n:lower()
-                -- Match exact or partial
-                if lowN == searchStr or lowN:find(searchStr, 1, true) then
-                    local iconName = t:match("([^%\\]+)$") or t
-                    BuffPlaner_Print("Found! |T" .. t .. ":16|t |cff00ff00" .. n .. "|r -> Icon: |cff00ffff" .. iconName .. "|r (ID: " .. i .. ")")
-                    foundCount = foundCount + 1
-                    if foundCount >= 100 then
-                        BuffPlaner_Print("...showing first 100 results. Try a more specific name if needed.")
-                        break
-                    end
-                end
-            end
-        end
-
-        if foundCount == 0 then
-            BuffPlaner_Print("|cffff0000Error:|r Could not find any spell matching '|cffffffff" .. arg .. "|r' up to ID 1,000,000.")
-        end
-    elseif cmd == "findall" then
-        BuffPlaner_Print("Scanning for ALL database spell icons (this will take a few seconds)...")
-        local buffs = BuffPlaner_GetBuffs()
-        local searchMap = {}
-        local results = {}
-        local foundCount = 0
-
-        -- Create a lookup map for names we need
-        for _, b in ipairs(buffs) do
-            local names = type(b.spellName) == "table" and b.spellName or { b.spellName }
-            for _, n in ipairs(names) do
-                searchMap[n:lower()] = { key = b.key, originalName = n }
-            end
-        end
-
-        -- Single pass scan through game database
-        for i = 1, 1000000 do
-            local n, _, t = GetSpellInfo(i)
-            if n then
-                local lowN = n:lower()
-                if searchMap[lowN] then
-                    local data = searchMap[lowN]
-                    if not results[data.key] then
-                        local iconName = t:match("([^%\\]+)$") or t
-                        results[data.key] = iconName
-                        foundCount = foundCount + 1
-                    end
-                end
-            end
-        end
-
-        -- Print results in copy-paste friendly format
-        BuffPlaner_Print("--- SCAN RESULTS (" .. foundCount .. " found) ---")
-        for _, b in ipairs(buffs) do
-            if results[b.key] then
-                print("|cff00ff00" .. b.key .. "|r -> icon = \"|cff00ffff" .. results[b.key] .. "|r\"")
-            else
-                print("|cffff0000" .. b.key .. "|r -> |cffffffffNOT FOUND|r (Check spell name: " .. (type(b.spellName) == "table" and b.spellName[1] or b.spellName) .. ")")
-            end
-        end
-        BuffPlaner_Print("--- END OF LIST ---")
-    ]]
-    --[[
-    elseif cmd == "check" then
-        for _, b in ipairs(BuffPlaner_GetBuffs()) do
-            local c = type(b.spellName) == "table" and b.spellName[1] or b.spellName
-            local n, _, t = GetSpellInfo(c)
-            if n then BuffPlaner_Print(string.format("|T%s:16|t %s -> |cff00ffff%s|r", t, n, t:match("([^%\\]+)$") or t))
-            else BuffPlaner_Print("|cffff0000Error:|r Spell '"..c.."' not found!") end
-        end
-    ]]
+        BuffPlanner_ToggleBuffButton()
     else
-        BuffPlaner_Print("Usage: /bp or /bp config, /bp buffbutton")
+        BuffPlanner_Print("Usage: /bp or /bp config, /bp buffbutton")
     end
 end

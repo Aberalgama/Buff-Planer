@@ -1,11 +1,11 @@
 -- =============================================================================
--- BuffPlaner_DB.lua
+-- BuffPlanner_DB.lua
 -- Default buff database. Hier können später CoA-spezifische Buffs hinzugefügt
 -- werden. Pro Buff wird ein Schlüsselname (für die DB) und ein Anzeigename
 -- gespeichert.
 -- =============================================================================
 
-BuffPlaner_DefaultConfig = {
+BuffPlanner_DefaultConfig = {
     -- Master list of all available buffs
     buffs = {
         -- spellName: { "Cast Name", "Alias 1", ... }
@@ -89,10 +89,10 @@ BuffPlaner_DefaultConfig = {
 }
 
 -- =============================================================================
--- BuffPlanerDB
+-- BuffPlannerDB
 -- Wird von SavedVariables initialisiert. Enthält die Buff-Auswahl pro Spieler.
 -- Format:
---   BuffPlanerDB = {
+--   BuffPlannerDB = {
 --     selections = {
 --       ["PlayerA"] = "spirit",
 --       ["PlayerB"] = nil,
@@ -100,7 +100,7 @@ BuffPlaner_DefaultConfig = {
 --     enabled = true,
 --   }
 -- =============================================================================
-BuffPlanerDB = BuffPlanerDB or {
+BuffPlannerDB = BuffPlannerDB or {
     selections = {},
     enabled = true,
     minimap = {},
@@ -108,52 +108,52 @@ BuffPlanerDB = BuffPlanerDB or {
 }
 
 -- Merge DB with defaults on first load
-function BuffPlaner_InitializeDB()
-    if not BuffPlanerDB then
-        BuffPlanerDB = {
+function BuffPlanner_InitializeDB()
+    if not BuffPlannerDB then
+        BuffPlannerDB = {
             selections = {},
             enabled = true,
             minimap = {},
             characters = {},
         }
     end
-    if not BuffPlanerDB.selections then BuffPlanerDB.selections = {} end
-    if not BuffPlanerDB.minimap then BuffPlanerDB.minimap = {} end
-    if not BuffPlanerDB.characters then BuffPlanerDB.characters = {} end
+    if not BuffPlannerDB.selections then BuffPlannerDB.selections = {} end
+    if not BuffPlannerDB.minimap then BuffPlannerDB.minimap = {} end
+    if not BuffPlannerDB.characters then BuffPlannerDB.characters = {} end
 
     -- Migrate legacy data to character-specific storage
     local k = UnitName("player") .. " - " .. GetRealmName()
-    if not BuffPlanerDB.characters[k] then
-        BuffPlanerDB.characters[k] = {
-            buttonPos = BuffPlanerDB.buttonPos and BuffPlanerDB.buttonPos[k] or { point = "CENTER", xOfs = 0, yOfs = 0 },
-            buttonSize = BuffPlanerDB.buttonSize or 60,
-            showSolo = (BuffPlanerDB.showSolo ~= nil) and BuffPlanerDB.showSolo or true
+    if not BuffPlannerDB.characters[k] then
+        BuffPlannerDB.characters[k] = {
+            buttonPos = BuffPlannerDB.buttonPos and BuffPlannerDB.buttonPos[k] or { point = "CENTER", xOfs = 0, yOfs = 0 },
+            buttonSize = BuffPlannerDB.buttonSize or 60,
+            showSolo = (BuffPlannerDB.showSolo ~= nil) and BuffPlannerDB.showSolo or true
         }
     end
 end
 
 -- Helper to get current character settings
-function BuffPlaner_GetCharSettings()
+function BuffPlanner_GetCharSettings()
     local k = UnitName("player") .. " - " .. GetRealmName()
-    if not BuffPlanerDB.characters then BuffPlanerDB.characters = {} end
-    if not BuffPlanerDB.characters[k] then
-        BuffPlanerDB.characters[k] = {
+    if not BuffPlannerDB.characters then BuffPlannerDB.characters = {} end
+    if not BuffPlannerDB.characters[k] then
+        BuffPlannerDB.characters[k] = {
             buttonPos = { point = "CENTER", xOfs = 0, yOfs = 0, show = true },
             buttonSize = 60,
             showSolo = true
         }
     end
-    return BuffPlanerDB.characters[k]
+    return BuffPlannerDB.characters[k]
 end
 
 -- Get the list of available buffs (from DB or default)
-function BuffPlaner_GetBuffs()
-    return BuffPlaner_DefaultConfig.buffs
+function BuffPlanner_GetBuffs()
+    return BuffPlanner_DefaultConfig.buffs
 end
 
 -- Get a buff by key
-function BuffPlaner_GetBuffByKey(key)
-    local buffs = BuffPlaner_GetBuffs()
+function BuffPlanner_GetBuffByKey(key)
+    local buffs = BuffPlanner_GetBuffs()
     for _, buff in ipairs(buffs) do
         if buff.key == key then
             return buff
