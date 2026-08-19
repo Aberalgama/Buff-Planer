@@ -1,5 +1,5 @@
 ## Interface: 30300
-## Title: Buff Planer
+## Title: Buff Planner
 ## Notes: Buff coordination for party/raid in CoA
 ## Author: Swet
 ## SavedVariables: BuffPlanerDB

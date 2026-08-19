@@ -23,15 +23,15 @@ local function GetCleanName(name)
 end
 
 local function createLDBLauncher()
-    local LDBObj = LibStub("LibDataBroker-1.1"):NewDataObject("BuffPlaner", {
+    local LDBObj = LibStub("LibDataBroker-1.1"):NewDataObject("BuffPlanner", {
         type = "launcher",
-        label = "Buff Planer",
+        label = "Buff Planner",
         OnClick = function() BuffPlaner_ToggleConfigWindow() end,
         icon = "Interface\\Icons\\spell_arcane_arcaneresilience",
         OnTooltipShow = function(tooltip)
             if not tooltip or not tooltip.AddLine then return end
-            tooltip:AddLine("Buff Planer")
-            tooltip:AddLine("|cffffff00Left click to open Buff Planer.")
+            tooltip:AddLine("Buff Planner")
+            tooltip:AddLine("|cffffff00Left click to open Buff Planner.")
             tooltip:AddLine("|cffffff00Alt + Left click & drag to move BUFF button.")
         end,
     })
@@ -54,8 +54,8 @@ function BuffPlaner_OnLoad(self)
         BuffPlaner_RefreshButtonVisibility()
     end
 
-    BuffPlaner_Print("Buff Planer geladen. /buffplaner zum Öffnen.");
-    SLASH_BUFFPLANNER1, SLASH_BUFFPLANNER2 = "/buffplaner", "/bp";
+    -- BuffPlaner_Print("Buff Planner geladen. /buffplanner zum Öffnen.");
+    SLASH_BUFFPLANNER1, SLASH_BUFFPLANNER2, SLASH_BUFFPLANNER3 = "/buffplanner", "/bp", "/buffplaner";
     SlashCmdList["BUFFPLANNER"] = BuffPlaner_OnSlashCommand;
     table.insert(UISpecialFrames, "BuffPlaner_ConfigFrame");
 end
@@ -215,7 +215,7 @@ function BuffPlaner_OnConfigShow()
     PanelTemplates_UpdateTabs(BuffPlaner_ConfigFrame)
 
     if not BuffPlaner_PlanerPage:IsVisible() then return end
-    BuffPlaner_ConfigFrameTitle:SetText("Buff Planer");
+    BuffPlanner_ConfigFrameTitle:SetText("Buff Planner");
 
     local _, myToken = UnitClass("player")
     -- Use standard print for debug to ensure it's seen
