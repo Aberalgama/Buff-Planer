@@ -242,6 +242,24 @@ function BuffPlanner_OnConfigShow()
     local hPadding = 2
     local rowWidth = 518
 
+    -- Calculate conflicts for the user's selections (only for players currently in party)
+    local categoryMap = {} -- cat -> { {playerName, buff}, ... }
+    local memberLookup = {}
+    for _, info in ipairs(members) do memberLookup[info.name] = true end
+
+    for pName, bKey in pairs(BuffPlannerDB.selections) do
+        if memberLookup[pName] then
+            local b = BuffPlanner_GetBuffByKey(bKey)
+            if b and b.category then
+                local cats = type(b.category) == "table" and b.category or { b.category }
+                for _, cat in ipairs(cats) do
+                    if not categoryMap[cat] then categoryMap[cat] = {} end
+                    table.insert(categoryMap[cat], { playerName = pName, buff = b })
+                end
+            end
+        end
+    end
+
     for _, info in ipairs(members) do
         local playerName, unit = info.name, info.unit
         local _, classToken = UnitClass(unit)
@@ -298,10 +316,31 @@ function BuffPlanner_OnConfigShow()
 
                 btn:SetBackdrop({edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", tile=true, tileSize=16, edgeSize=12, insets={left=2,right=2,top=2,bottom=2}})
 
+                -- Conflict Detection for this button
+                local isConflicting = false
+                local conflictNames = {}
+                if selectedKey == buff.key then
+                    local cats = type(buff.category) == "table" and buff.category or { buff.category }
+                    for _, cat in ipairs(cats) do
+                        if categoryMap[cat] and #categoryMap[cat] > 1 then
+                            isConflicting = true
+                            for _, other in ipairs(categoryMap[cat]) do
+                                if other.playerName ~= playerName or other.buff.key ~= buff.key then
+                                    table.insert(conflictNames, "|cffffffff" .. other.buff.name .. "|r (" .. other.playerName .. ")")
+                                end
+                            end
+                        end
+                    end
+                end
+
                 if not hasAddon or not knows then
                     btn:SetBackdropBorderColor(1, 0, 0, 1) -- Red border for unknown/no addon
                     icon:SetVertexColor(0.2, 0.2, 0.2, 0.8) -- Dimmed icon
                     icon:SetDesaturated(true)
+                elseif isConflicting then
+                    btn:SetBackdropBorderColor(1, 0.5, 0, 1) -- Orange border for conflicting
+                    icon:SetVertexColor(1, 1, 1, 1)
+                    icon:SetDesaturated(false)
                 elseif selectedKey == buff.key then
                     btn:SetBackdropBorderColor(0, 1, 0, 1) -- Green border for selected
                     icon:SetVertexColor(1, 1, 1, 1)
@@ -311,6 +350,13 @@ function BuffPlanner_OnConfigShow()
                     icon:SetVertexColor(0.4, 0.4, 0.4, 1)
                     icon:SetDesaturated(false)
                 end
+
+                -- Conflict Icon (Exclamation mark)
+                local conflictIcon = btn:CreateTexture(nil, "OVERLAY", nil, 7)
+                conflictIcon:SetSize(14, 14)
+                conflictIcon:SetPoint("TOPRIGHT", btn, "TOPRIGHT", 3, 3)
+                conflictIcon:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon")
+                if isConflicting then conflictIcon:Show() else conflictIcon:Hide() end
 
                 if hasAddon and knows then
                     btn.buffKey, btn.playerName = buff.key, playerName
@@ -332,6 +378,16 @@ function BuffPlanner_OnConfigShow()
                     end
                     GameTooltip:SetText(header, 1, 1, 1)
                     GameTooltip:AddLine(castName, 0.7, 0.7, 0.7)
+
+                    if isConflicting then
+                        GameTooltip:AddLine(" ")
+                        GameTooltip:AddLine("|cffff7f00Warning:|r This buff does not stack with:", 1, 0.5, 0)
+                        for _, otherName in ipairs(conflictNames) do
+                            GameTooltip:AddLine("- " .. otherName, 1, 0.8, 0.8)
+                        end
+                        GameTooltip:AddLine("Only one will be cast automatically.", 0.6, 0.6, 0.6)
+                    end
+
                     GameTooltip:Show()
                 end)
                 btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
