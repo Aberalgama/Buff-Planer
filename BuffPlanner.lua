@@ -350,19 +350,36 @@ end
 -- Buff Button Core Logic
 -- =============================================================================
 
-local function UnitHasBuff(unit, spellInput)
-    if not unit then return false, 0 end
-    local searchList = type(spellInput) == "table" and spellInput or { spellInput }
-    for i = 1, 40 do
-        local name, _, _, _, _, _, expires = UnitBuff(unit, i)
-        if not name then break end
-        for _, searchName in ipairs(searchList) do
-            if name == searchName or name == "Greater " .. searchName then
-                return true, expires
+local function UnitHasBuff(unit, buff)
+    if not unit or not buff then return false, 0 end
+
+    local categories = type(buff.category) == "table" and buff.category or { buff.category }
+    local allSearchNames = {}
+
+    for _, cat in ipairs(categories) do
+        local relatedBuffs = BuffPlanner_GetBuffsByCategory(cat)
+        for _, rb in ipairs(relatedBuffs) do
+            local names = type(rb.spellName) == "table" and rb.spellName or { rb.spellName }
+            for _, n in ipairs(names) do
+                allSearchNames[n] = true
+                allSearchNames["Greater " .. n] = true
             end
         end
     end
-    return false, 0
+
+    local found, minExpires = false, 999999
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expires = UnitBuff(unit, i)
+        if not name then break end
+        if allSearchNames[name] then
+            found = true
+            if expires and expires > 0 then
+                minExpires = math.min(minExpires, expires)
+            end
+        end
+    end
+
+    return found, (minExpires == 999999 and 0 or minExpires)
 end
 
 local function UnitIsInRange(unit, buff)
@@ -439,7 +456,7 @@ function BuffPlanner_UpdateBuffButton()
         if desiredKey then
             local b = BuffPlanner_GetBuffByKey(desiredKey)
             if b and UnitIsInRange("target", b) then
-                local has = UnitHasBuff("target", b.spellName)
+                local has = UnitHasBuff("target", b)
                 if not has then
                     someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, (UnitIsUnit("target", "player") and "player" or "target"), tName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
                 end
@@ -455,7 +472,7 @@ function BuffPlanner_UpdateBuffButton()
             if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
                 local b = BuffPlanner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange(unit, b) then
-                    local has, exp = UnitHasBuff(unit, b.spellName)
+                    local has, exp = UnitHasBuff(unit, b)
                     if not has then
                         someoneNeedsBuff, targetUnitToken, targetName, castSpellName = true, unit, recipientName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
                         break -- Found someone who needs it, stop looking
@@ -474,7 +491,7 @@ function BuffPlanner_UpdateBuffButton()
             if desiredKey then
                 local b = BuffPlanner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange("target", b) then
-                    local has, exp = UnitHasBuff("target", b.spellName)
+                    local has, exp = UnitHasBuff("target", b)
                     if has and exp and exp > 0 then
                         any, minExp = true, (exp - GetTime())
                         targetUnitToken, targetName, castSpellName = (UnitIsUnit("target", "player") and "player" or "target"), tName, (type(b.spellName) == "table" and b.spellName[1] or b.spellName)
@@ -490,7 +507,7 @@ function BuffPlanner_UpdateBuffButton()
             if desiredKey and unit and not UnitIsDeadOrGhost(unit) then
                 local b = BuffPlanner_GetBuffByKey(desiredKey)
                 if b and UnitIsInRange(unit, b) then
-                    local has, exp = UnitHasBuff(unit, b.spellName)
+                    local has, exp = UnitHasBuff(unit, b)
                     if has and exp and exp > 0 then
                         any = true
                         local rem = exp - GetTime()

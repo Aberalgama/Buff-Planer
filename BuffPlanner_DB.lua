@@ -11,56 +11,56 @@ BuffPlanner_DefaultConfig = {
         -- spellName: { "Cast Name", "Alias 1", ... }
         -- raidSpellName: (Optional) The group/raid version of the spell
         -- range: (Optional) Buff range in yards (default 40)
-        { key = "sun_mp5_cost_reduction",   name = "MP5 + Cost Reduction",         spellName = { "Devotion of Grace" }, icon = "Devotion_of_Grace", range = 40 },
-        { key = "sun_ap",    name = "AP",          spellName = { "Devotion of Dawn" },  icon = "Devotion_of_Radiance", range = 40 },
-        { key = "sun_stats", name = "All Stats %",  spellName = { "Devotion of Emperors", "Devotion of Emperrors" }, icon = "Devotion_of_Emperors", range = 40 },
-        { key = "sun_sp",    name = "SP",          spellName = { "Devotion of Radiance" }, icon = "Devotion_of_Dawnbreak", range = 40 },
-        { key = "cul_sp",    name = "SP",          spellName = { "Whispers of C'thun" }, icon = "inv_knife_1h_artifactcthun_d_06", range = 30 },
-        { key = "cul_mp5",    name = "MP5",          spellName = { "Whispers of Y'shaarj" }, icon = "ability_garrosh_touch_of_yshaarj", range = 30 },
-        { key = "cul_stats",    name = "All Stats %",          spellName = { "Whispers of N'Zoth" }, icon = "achievement_nzothraid_nzoth", range = 30 },
-        { key = "cul_reduce_spell_damage_taken_and_heal",    name = "Reduce Spell DMG taken and Heal",          spellName = { "Whispers of Yogg-Saron" }, icon = "void_tinged_trinket", range = 30 },
-        { key = "nec_stamina",    name = "Stamina",          spellName = { "Foul Mandate" }, icon = "inv_mawratgreen", range = 30 },
-        { key = "nec_sp",    name = "SP",          spellName = { "Grim Mandate" }, icon = "inv_mawratblue", range = 30 },
-        { key = "pyr_int",    name = "INT",          spellName = { "Seal of Alysrazor" }, icon = "pyro_scroll", range = 40 },
-        { key = "pyr_mp5",    name = "MP5",          spellName = { "Seal of Al'ar" }, icon = "inv_trinket_firelands_01", range = 40 },
-        { key = "star_int",    name = "INT",          spellName = { "Celestial Mind" }, icon = "Spell_Shadow_Brainwash", range = 40 },
-        { key = "tin_mp5",    name = "MP5",          spellName = { "Mana Module" }, icon = "inv_engineering_reavesbattery", range = 40 },
-        { key = "tin_ap",    name = "AP",          spellName = { "Power Module" }, icon = "inv_gizmo_khoriumpowercore", range = 40 },
-        { key = "run_stats",    name = "All Stats %",          spellName = { "Etching of the Leylines" }, icon = "inv_glyph_minorhunter", range = 40 },
-        { key = "run_agi",    name = "AGI",          spellName = { "Etching of the Dextrous" }, icon = "inv_glyph_minordruid", range = 40 },
-        { key = "run_cost_reduction",    name = "Cost Reduction",          spellName = { "Etching of the Magi" }, icon = "inv_glyph_minorpaladin", range = 40 },
-        { key = "pri_mp5",    name = "MP5",          spellName = { "Grove Instinct" }, icon = "Grove_Instinct_Primalist", range = 40 },
-        { key = "pri_ap",    name = "AP",          spellName = { "Primal Instinct" }, icon = "Ability_Hunter_Pet_Raptor", range = 40 },
-        { key = "rea_stamina",    name = "Stamina",          spellName = { "Rite of Resolve" }, icon = "ui_sigil_venthyr", range = 40 },
-        { key = "rea_str",    name = "STR",          spellName = { "Rite of Power" }, icon = "ui_sigil_necrolord", range = 40 },
-        { key = "rea_res",    name = "Resistances",          spellName = { "Rite of Perseverance" }, icon = "ui_sigil_nightfae", range = 40 },
-        { key = "ven_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Beetle Pheromones" }, icon = "inv_progenitorbeetlegreen", range = 40 },
-        { key = "ven_sp",    name = "SP",          spellName = { "Toxic Pheromones" }, icon = "epic_rpg_icon_pack_poison_icon_0003s_0000_cloud_Border", range = 40 },
-        { key = "ven_agi",    name = "AGI",          spellName = { "Spider Pheromones" }, icon = "nhi_spiderweb_Border", range = 40 },
-        { key = "chr_int",    name = "INT",          spellName = { "Nozdormu's Wisdom" }, icon = "Nozdormu_Wisdom", range = 40 },
-        { key = "chr_spirit",    name = "Spirit",          spellName = { "Chromie's Wisdom" }, icon = "Chromies_Wisdom", range = 40 },
-        { key = "blo_stamina",    name = "Stamina",          spellName = { "Sanguinary Offering" }, icon = "ability_deathwing_bloodcorruption_death", range = 40 },
-        { key = "blo_spirit",    name = "Spirit",          spellName = { "Bloodsoaked Offering" }, icon = "inv_armor_bloodtroll_c_01_helm", range = 40 },
-        { key = "blo_inc_spell_dmg_taken_heal",    name = "Increase Spell DMG Taken and Heal",          spellName = { "Slaughterhouse Offering" }, icon = "ability_deathknight_deathchain", range = 40 },
-        { key = "gua_str",    name = "STR",          spellName = { "Honor" }, icon = "novart_physical_ability_(45)_Border", range = 40 },
-        { key = "sto_int",    name = "INT",          spellName = { "Call of the Storm" }, icon = "spell_nature_callstorm", range = 40 },
-        { key = "sto_mp5",    name = "MP5",          spellName = { "Call of the Wind" }, icon = "novart_magicspell_(21)_Border", range = 40 },
-        { key = "fel_agi",    name = "AGI",          spellName = { "Illidari Intuition" }, icon = "Ability_Warlock_DemonicPower", range = 40 },
-        { key = "fel_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Man'ari Intuition" }, icon = "ability_demonhunter_demonictrample", range = 40 },
-        { key = "wit_spirit",    name = "Spirit",          spellName = { "Spirit Wuju" }, icon = "inv_misc_tournaments_symbol_troll", range = 40 },
-        { key = "wit_ap",    name = "AP",          spellName = { "Power Wuju" }, icon = "shaman_pvp_skyfurytotem", range = 30 },
-        { key = "wit_cost_reduction",    name = "Cost Reduction",          spellName = { "Resourceful Wuju" }, icon = "custom_T_Nhance_RPG_Icons_ShadowPotion_Border", range = 30 },
-        { key = "wit_doc_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Knight's Edict" }, icon = "WH_Knight_Edict", range = 40 },
-        { key = "wit_doc_agi",    name = "AGI",          spellName = { "Inquisitor's Edict" }, icon = "WH_Inquis_Edict", range = 40 },
-        { key = "wit_doc_sp",    name = "SP",          spellName = { "Witching Edict" }, icon = "WH_Witching_Edict", range = 40 },
-        { key = "kox_stamina_frost",    name = "Stamina + Frost Resi",          spellName = { "Mark of Rivendare" }, icon = "Spell_DeathKnight_SummonDeathCharger", range = 40 },
-        { key = "kox_cost_reduction_arcane",    name = "Cost Reduction + Arcane Resi",          spellName = { "Mark of Zeliek" }, icon = "ability_deathknight_asphixiate", range = 40 },
-        { key = "kox_sp_shadow",    name = "SP + Shadow Resi",          spellName = { "Mark of Blaumeux" }, icon = "inv_helm_mail_raidshamanprimalist_d_01_fire", range = 40 },
-        { key = "kox_str_fire",    name = "STR + Fire Resi",          spellName = { "Mark of Korth'azz" }, icon = "novart_magicspell_(31)_Border", range = 40 },
-        { key = "tem_stats",    name = "All Stats %",          spellName = { "Gift of Fervor" }, icon = "Templar_Buff_4", range = 40 },
-        { key = "tem_agi",    name = "AGI",          spellName = { "Gift of Zeal" }, icon = "Templar_Buff_3", range = 40 },
-        { key = "ran_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Footpad's Adaptation" }, icon = "ability_rogue_thiefsbargain", range = 40 },
-        { key = "ran_ap",    name = "AP",          spellName = { "Woodsman's Adaptation" }, icon = "misc_legionfall_hunter", range = 40 },
+        { key = "sun_mp5_cost_reduction",   name = "MP5 + Cost Reduction",         spellName = { "Devotion of Grace" }, icon = "Devotion_of_Grace", range = 40, category = { "mp5", "cr" } },
+        { key = "sun_ap",    name = "AP",          spellName = { "Devotion of Dawn" },  icon = "Devotion_of_Radiance", range = 40, category = { "ap" } },
+        { key = "sun_stats", name = "All Stats %",  spellName = { "Devotion of Emperors", "Devotion of Emperrors" }, icon = "Devotion_of_Emperors", range = 40, category = { "all_stats" } },
+        { key = "sun_sp",    name = "SP",          spellName = { "Devotion of Radiance" }, icon = "Devotion_of_Dawnbreak", range = 40, category = { "sp" } },
+        { key = "cul_sp",    name = "SP",          spellName = { "Whispers of C'thun" }, icon = "inv_knife_1h_artifactcthun_d_06", range = 30, category = { "sp" } },
+        { key = "cul_mp5",    name = "MP5",          spellName = { "Whispers of Y'shaarj" }, icon = "ability_garrosh_touch_of_yshaarj", range = 30, category = { "mp5" } },
+        { key = "cul_stats",    name = "All Stats %",          spellName = { "Whispers of N'Zoth" }, icon = "achievement_nzothraid_nzoth", range = 30, category = { "all_stats" } },
+        { key = "cul_reduce_spell_damage_taken_and_heal",    name = "Reduce Spell DMG taken and Heal",          spellName = { "Whispers of Yogg-Saron" }, icon = "void_tinged_trinket", range = 30, category = { "reduce_spell_taken_heal" } },
+        { key = "nec_stamina",    name = "Stamina",          spellName = { "Foul Mandate" }, icon = "inv_mawratgreen", range = 30, category = { "sta" } },
+        { key = "nec_sp",    name = "SP",          spellName = { "Grim Mandate" }, icon = "inv_mawratblue", range = 30, category = { "sp" } },
+        { key = "pyr_int",    name = "INT",          spellName = { "Seal of Alysrazor" }, icon = "pyro_scroll", range = 40, category = { "int" } },
+        { key = "pyr_mp5",    name = "MP5",          spellName = { "Seal of Al'ar" }, icon = "inv_trinket_firelands_01", range = 40, category = { "mp5" } },
+        { key = "star_int",    name = "INT",          spellName = { "Celestial Mind" }, icon = "Spell_Shadow_Brainwash", range = 40, category = { "int" } },
+        { key = "tin_mp5",    name = "MP5",          spellName = { "Mana Module" }, icon = "inv_engineering_reavesbattery", range = 40, category = { "mp5" } },
+        { key = "tin_ap",    name = "AP",          spellName = { "Power Module" }, icon = "inv_gizmo_khoriumpowercore", range = 40, category = { "ap" } },
+        { key = "run_stats",    name = "All Stats %",          spellName = { "Etching of the Leylines" }, icon = "inv_glyph_minorhunter", range = 40, category = { "all_stats" } },
+        { key = "run_agi",    name = "AGI",          spellName = { "Etching of the Dextrous" }, icon = "inv_glyph_minordruid", range = 40, category = { "agi" } },
+        { key = "run_cost_reduction",    name = "Cost Reduction",          spellName = { "Etching of the Magi" }, icon = "inv_glyph_minorpaladin", range = 40, category = { "cr" } },
+        { key = "pri_mp5",    name = "MP5",          spellName = { "Grove Instinct" }, icon = "Grove_Instinct_Primalist", range = 40, category = { "mp5" } },
+        { key = "pri_ap",    name = "AP",          spellName = { "Primal Instinct" }, icon = "Ability_Hunter_Pet_Raptor", range = 40, category = { "ap" } },
+        { key = "rea_stamina",    name = "Stamina",          spellName = { "Rite of Resolve" }, icon = "ui_sigil_venthyr", range = 40, category = { "sta" } },
+        { key = "rea_str",    name = "STR",          spellName = { "Rite of Power" }, icon = "ui_sigil_necrolord", range = 40, category = { "str" } },
+        { key = "rea_res",    name = "Resistances",          spellName = { "Rite of Perseverance" }, icon = "ui_sigil_nightfae", range = 40, category = { "all_res" } },
+        { key = "ven_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Beetle Pheromones" }, icon = "inv_progenitorbeetlegreen", range = 40, category = { "arm_stats_flat" } },
+        { key = "ven_sp",    name = "SP",          spellName = { "Toxic Pheromones" }, icon = "epic_rpg_icon_pack_poison_icon_0003s_0000_cloud_Border", range = 40, category = { "sp" } },
+        { key = "ven_agi",    name = "AGI",          spellName = { "Spider Pheromones" }, icon = "nhi_spiderweb_Border", range = 40, category = { "agi" } },
+        { key = "chr_int",    name = "INT",          spellName = { "Nozdormu's Wisdom" }, icon = "Nozdormu_Wisdom", range = 40, category = { "int" } },
+        { key = "chr_spirit",    name = "Spirit",          spellName = { "Chromie's Wisdom" }, icon = "Chromies_Wisdom", range = 40, category = { "spirit" } },
+        { key = "blo_stamina",    name = "Stamina",          spellName = { "Sanguinary Offering" }, icon = "ability_deathwing_bloodcorruption_death", range = 40, category = { "sta" } },
+        { key = "blo_spirit",    name = "Spirit",          spellName = { "Bloodsoaked Offering" }, icon = "inv_armor_bloodtroll_c_01_helm", range = 40, category = { "spirit" } },
+        { key = "blo_inc_spell_dmg_taken_heal",    name = "Increase Spell DMG Taken and Heal",          spellName = { "Slaughterhouse Offering" }, icon = "ability_deathknight_deathchain", range = 40, category = { "inc_spell_taken_heal" } },
+        { key = "gua_str",    name = "STR",          spellName = { "Honor" }, icon = "novart_physical_ability_(45)_Border", range = 40, category = { "str" } },
+        { key = "sto_int",    name = "INT",          spellName = { "Call of the Storm" }, icon = "spell_nature_callstorm", range = 40, category = { "int" } },
+        { key = "sto_mp5",    name = "MP5",          spellName = { "Call of the Wind" }, icon = "novart_magicspell_(21)_Border", range = 40, category = { "mp5" } },
+        { key = "fel_agi",    name = "AGI",          spellName = { "Illidari Intuition" }, icon = "Ability_Warlock_DemonicPower", range = 40, category = { "agi" } },
+        { key = "fel_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Man'ari Intuition" }, icon = "ability_demonhunter_demonictrample", range = 40, category = { "arm_stats_flat" } },
+        { key = "wit_spirit",    name = "Spirit",          spellName = { "Spirit Wuju" }, icon = "inv_misc_tournaments_symbol_troll", range = 40, category = { "spirit" } },
+        { key = "wit_ap",    name = "AP",          spellName = { "Power Wuju" }, icon = "shaman_pvp_skyfurytotem", range = 30, category = { "ap" } },
+        { key = "wit_cost_reduction",    name = "Cost Reduction",          spellName = { "Resourceful Wuju" }, icon = "custom_T_Nhance_RPG_Icons_ShadowPotion_Border", range = 30, category = { "cr" } },
+        { key = "wit_doc_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Knight's Edict" }, icon = "WH_Knight_Edict", range = 40, category = { "arm_stats_flat" } },
+        { key = "wit_doc_agi",    name = "AGI",          spellName = { "Inquisitor's Edict" }, icon = "WH_Inquis_Edict", range = 40, category = { "agi" } },
+        { key = "wit_doc_sp",    name = "SP",          spellName = { "Witching Edict" }, icon = "WH_Witching_Edict", range = 40, category = { "sp" } },
+        { key = "kox_stamina_frost",    name = "Stamina + Frost Resi",          spellName = { "Mark of Rivendare" }, icon = "Spell_DeathKnight_SummonDeathCharger", range = 40, category = { "sta", "frost_resi" } },
+        { key = "kox_cost_reduction_arcane",    name = "Cost Reduction + Arcane Resi",          spellName = { "Mark of Zeliek" }, icon = "ability_deathknight_asphixiate", range = 40, category = { "cr", "arcane_resi" } },
+        { key = "kox_sp_shadow",    name = "SP + Shadow Resi",          spellName = { "Mark of Blaumeux" }, icon = "inv_helm_mail_raidshamanprimalist_d_01_fire", range = 40, category = { "sp", "shadow_resi" } },
+        { key = "kox_str_fire",    name = "STR + Fire Resi",          spellName = { "Mark of Korth'azz" }, icon = "novart_magicspell_(31)_Border", range = 40, category = { "str", "fire_resi" } },
+        { key = "tem_stats",    name = "All Stats %",          spellName = { "Gift of Fervor" }, icon = "Templar_Buff_4", range = 40, category = { "all_stats" } },
+        { key = "tem_agi",    name = "AGI",          spellName = { "Gift of Zeal" }, icon = "Templar_Buff_3", range = 40, category = { "agi" } },
+        { key = "ran_arm_stats",    name = "Armour + All Stats flat",          spellName = { "Footpad's Adaptation" }, icon = "ability_rogue_thiefsbargain", range = 40, category = { "arm_stats_flat" } },
+        { key = "ran_ap",    name = "AP",          spellName = { "Woodsman's Adaptation" }, icon = "misc_legionfall_hunter", range = 40, category = { "ap" } },
     },
 
     -- Mapping of which buffs belong to which class
@@ -161,4 +161,23 @@ function BuffPlanner_GetBuffByKey(key)
         end
     end
     return nil
+end
+
+-- Helper to get buffs by category
+function BuffPlanner_GetBuffsByCategory(category)
+    local buffs = BuffPlanner_GetBuffs()
+    local result = {}
+    for _, buff in ipairs(buffs) do
+        if type(buff.category) == "table" then
+            for _, cat in ipairs(buff.category) do
+                if cat == category then
+                    table.insert(result, buff)
+                    break
+                end
+            end
+        elseif buff.category == category then
+            table.insert(result, buff)
+        end
+    end
+    return result
 end
